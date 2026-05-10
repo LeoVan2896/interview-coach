@@ -160,14 +160,14 @@ export default function DsaRoadmapPage() {
   )
 }
 
+const DIFFS = ['Easy', 'Medium', 'Hard']
+
 function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
   const solvedCount = topic.problems.filter(p => progress[p.id]).length
   const total = topic.problems.length
   const pct = total > 0 ? (solvedCount / total) * 100 : 0
 
   const [activeFilter, setActiveFilter] = useState('All')
-
-  const DIFFS = ['Easy', 'Medium', 'Hard']
   const counts = Object.fromEntries(
     DIFFS.map(d => [
       d,
@@ -260,7 +260,7 @@ function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
               }}>
                 <span style={{ color, fontSize: 8 }}>●</span>
                 <span style={{ fontSize: 11.5, fontWeight: 600, color: '#c9d1d9' }}>
-                  {counts[d].done} {d}
+                  {counts[d].done}/{counts[d].total} {d}
                 </span>
               </div>
             )
@@ -301,6 +301,11 @@ function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
 
       {/* Problem table */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
+        {visibleProblems.length === 0 && (
+          <div style={{ fontSize: 12, color: '#8b949e', padding: '24px 0', textAlign: 'center' }}>
+            No {activeFilter} problems in this topic.
+          </div>
+        )}
         {/* Table header */}
         <div style={{ display: 'grid', gridTemplateColumns: '54px 1fr 76px 52px', padding: '7px 12px', borderBottom: '1px solid #21262d', position: 'sticky', top: 0, background: '#161b22', zIndex: 2 }}>
           {['Status', 'Problem', 'Difficulty', 'Solution'].map((h, i) => (
