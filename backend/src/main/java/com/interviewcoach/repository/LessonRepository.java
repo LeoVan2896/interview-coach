@@ -15,4 +15,5 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
     List<Lesson> findAllByOrderBySortOrderAsc();
     List<Lesson> findByCategoryOrderBySortOrderAsc(LessonCategory category);
     List<Lesson> findByStatusOrderBySortOrderAsc(LessonStatus status);
+    long countByStatus(LessonStatus status);
 }

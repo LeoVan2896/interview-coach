@@ -40,6 +40,9 @@ public class ScheduleDay {
     @Column(name = "is_milestone", nullable = false)
     private boolean isMilestone = false;
 
+    @Column(name = "lesson_id")
+    private Long lessonId;
+
     public ScheduleDay() {}
 
     public Long getId() { return id; }
@@ -74,4 +77,7 @@ public class ScheduleDay {
 
     public boolean isMilestone() { return isMilestone; }
     public void setMilestone(boolean isMilestone) { this.isMilestone = isMilestone; }
+
+    public Long getLessonId() { return lessonId; }
+    public void setLessonId(Long lessonId) { this.lessonId = lessonId; }
 }
