@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { fetchLessonById } from '../../api/lessons'
 
 const CAT_COLOR = {
@@ -20,6 +21,7 @@ const STATUS_STYLE = {
 }
 
 export default function LessonDetailPanel({ lesson, onClose, onStatusChange }) {
+  const navigate = useNavigate()
   const [detail, setDetail] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -120,7 +122,10 @@ export default function LessonDetailPanel({ lesson, onClose, onStatusChange }) {
         >
           {lesson.status === 'NOT_STARTED' ? '▶ Start Lesson' : lesson.status === 'IN_PROGRESS' ? '✓ Mark Done' : '✅ Completed'}
         </button>
-        <button style={{ flex: 1, border: '1.5px solid #c4b5fd', borderRadius: 9, padding: '9px 12px', fontSize: 13, fontWeight: 600, background: '#fff', color: 'var(--color-purple)' }}>
+        <button
+          onClick={() => navigate('/practice', { state: { lessonId: lesson.id, lessonTitle: lesson.title, category: lesson.category } })}
+          style={{ flex: 1, border: '1.5px solid #c4b5fd', borderRadius: 9, padding: '9px 12px', fontSize: 13, fontWeight: 600, background: '#fff', color: 'var(--color-purple)', cursor: 'pointer' }}
+        >
           🎯 Interview Q&amp;A
         </button>
       </div>
