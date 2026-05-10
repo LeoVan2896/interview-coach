@@ -20,7 +20,7 @@ export default function WeekStrip({ weekDays }) {
         const icon = STATUS_ICON[day.status] || ''
         return (
           <div
-            key={day.date}
+            key={day.date ?? day.dayLabel}
             style={{
               ...s,
               borderRadius: 8,

@@ -3,7 +3,7 @@ export default function PillarCard({ color, icon, label, badge, title, desc, but
     <div style={{
       border: '1px solid var(--color-border)',
       borderRadius: 10,
-      background: '#fff',
+      background: 'var(--color-surface)',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
@@ -48,23 +48,25 @@ export default function PillarCard({ color, icon, label, badge, title, desc, but
         )}
 
         {/* Action button */}
-        <button
-          onClick={onAction}
-          style={{
-            marginTop: 'auto',
-            padding: '7px 14px',
-            background: color,
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: 'pointer',
-            alignSelf: 'flex-start',
-          }}
-        >
-          {buttonLabel}
-        </button>
+        {buttonLabel && (
+          <button
+            onClick={onAction}
+            style={{
+              marginTop: 'auto',
+              padding: '7px 14px',
+              background: color,
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              alignSelf: 'flex-start',
+            }}
+          >
+            {buttonLabel}
+          </button>
+        )}
       </div>
     </div>
   )

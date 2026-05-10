@@ -1,4 +1,4 @@
-export default function DsaProgressList({ dsaProgress }) {
+export default function DsaProgressList({ dsaProgress = [] }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1 }}>
       {dsaProgress.map(({ topicId, label, done, total }) => {
