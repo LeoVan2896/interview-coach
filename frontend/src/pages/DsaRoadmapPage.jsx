@@ -301,11 +301,6 @@ function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
 
       {/* Problem table */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
-        {visibleProblems.length === 0 && (
-          <div style={{ fontSize: 12, color: '#8b949e', padding: '24px 0', textAlign: 'center' }}>
-            No {activeFilter} problems in this topic.
-          </div>
-        )}
         {/* Table header */}
         <div style={{ display: 'grid', gridTemplateColumns: '54px 1fr 76px 52px', padding: '7px 12px', borderBottom: '1px solid #21262d', position: 'sticky', top: 0, background: '#161b22', zIndex: 2 }}>
           {['Status', 'Problem', 'Difficulty', 'Solution'].map((h, i) => (
@@ -314,6 +309,13 @@ function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
             </div>
           ))}
         </div>
+
+        {/* Empty state */}
+        {visibleProblems.length === 0 && (
+          <div style={{ fontSize: 12, color: '#8b949e', padding: '24px 0', textAlign: 'center' }}>
+            No {activeFilter} problems in this topic.
+          </div>
+        )}
 
         {/* Rows */}
         {visibleProblems.map(prob => {
