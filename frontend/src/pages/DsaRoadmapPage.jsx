@@ -165,6 +165,22 @@ function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
   const total = topic.problems.length
   const pct = total > 0 ? (solvedCount / total) * 100 : 0
 
+  const [activeFilter, setActiveFilter] = useState('All')
+
+  const DIFFS = ['Easy', 'Medium', 'Hard']
+  const counts = Object.fromEntries(
+    DIFFS.map(d => [
+      d,
+      {
+        total: topic.problems.filter(p => p.difficulty === d).length,
+        done:  topic.problems.filter(p => p.difficulty === d && progress[p.id]).length,
+      }
+    ])
+  )
+  const visibleProblems = activeFilter === 'All'
+    ? topic.problems
+    : topic.problems.filter(p => p.difficulty === activeFilter)
+
   return (
     <>
       {/* Panel header */}
@@ -230,6 +246,59 @@ function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
         </button>
       </div>
 
+      {/* Stats Bar */}
+      <div style={{ padding: '8px 18px', borderBottom: '1px solid #21262d', flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 10 }}>
+          {DIFFS.map(d => {
+            const color = d === 'Easy' ? '#3fb950' : d === 'Medium' ? '#d29922' : '#f85149'
+            return (
+              <div key={d} style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '3px 10px', borderRadius: 99,
+                background: 'rgba(255,255,255,.05)',
+                border: `1px solid ${color}44`,
+              }}>
+                <span style={{ color, fontSize: 8 }}>●</span>
+                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#c9d1d9' }}>
+                  {counts[d].done} {d}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Filter Row */}
+      <div style={{ padding: '8px 18px', borderBottom: '1px solid #21262d', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {['All', 'Easy', 'Medium', 'Hard'].map(f => {
+            const isActive = activeFilter === f
+            const activeStyles = {
+              All:    { bg: 'rgba(56,139,253,.15)',  border: '#388bfd', text: '#58a6ff' },
+              Easy:   { bg: 'rgba(63,185,80,.15)',   border: '#3fb950', text: '#3fb950' },
+              Medium: { bg: 'rgba(210,153,34,.15)',  border: '#d29922', text: '#d29922' },
+              Hard:   { bg: 'rgba(248,81,73,.15)',   border: '#f85149', text: '#f85149' },
+            }[f]
+            return (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                style={{
+                  padding: '4px 12px', borderRadius: 99, fontSize: 11, fontWeight: 600,
+                  cursor: 'pointer',
+                  border: `1px solid ${isActive ? activeStyles.border : '#30363d'}`,
+                  background: isActive ? activeStyles.bg : '#21262d',
+                  color: isActive ? activeStyles.text : '#8b949e',
+                  transition: 'all .15s',
+                }}
+              >
+                {f}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       {/* Problem table */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {/* Table header */}
@@ -242,7 +311,7 @@ function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
         </div>
 
         {/* Rows */}
-        {topic.problems.map(prob => {
+        {visibleProblems.map(prob => {
           const done = !!progress[prob.id]
           const diffColor = prob.difficulty === 'Easy' ? '#3fb950' : prob.difficulty === 'Medium' ? '#d29922' : '#f85149'
           return (
