@@ -4,6 +4,7 @@ import { TOPICS, TOTAL_PROBLEMS } from '../data/dsaData.js'
 
 const LS_KEY = 'dsa_progress'
 const TOTAL_LESSONS = 60
+const STAGE_STEP = 100 / 9
 
 export function useDashboard() {
   const [data, setData] = useState(null)
@@ -34,7 +35,7 @@ export function useDashboard() {
         const lessonsDone = serverData.stats.lessonsDone
         const globePercent =
           ((lessonsDone / TOTAL_LESSONS) * 0.5 + (problemsDone / TOTAL_PROBLEMS) * 0.5) * 100
-        const globeStage = Math.min(9, Math.floor(globePercent / 11.11) + 1)
+        const globeStage = Math.min(9, Math.floor(globePercent / STAGE_STEP) + 1)
 
         if (!cancelled) setData({ ...serverData, problemsDone, dsaProgress, globeStage })
       })
