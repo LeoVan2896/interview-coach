@@ -768,6 +768,34 @@ export default function DsaConceptPage() {
           </ul>
         </Section>
 
+        {/* Common Interview Patterns */}
+        <Section title="Common Interview Patterns">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+            {concept.patterns.map((p, i) => (
+              <div key={i} style={{
+                background: '#161b22',
+                border: '1px solid #21262d',
+                borderLeft: '3px solid #388bfd',
+                borderRadius: 8,
+                padding: '14px 16px',
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#f0f6fc' }}>{p.name}</div>
+                <div style={{ fontSize: 12.5, fontStyle: 'italic', color: '#8b949e', marginTop: 6, lineHeight: 1.6 }}>
+                  {p.signal}
+                </div>
+                <div style={{
+                  fontSize: 11, color: '#58a6ff',
+                  background: 'rgba(56,139,253,.1)',
+                  borderRadius: 4, padding: '2px 7px',
+                  marginTop: 10, display: 'inline-block',
+                }}>
+                  eg. {p.example}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
         {/* Complexity Table */}
         <Section title="Time & Space Complexity">
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
