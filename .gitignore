@@ -1,0 +1,29 @@
+# ===== Backend (Maven / Spring Boot) =====
+backend/target/
+backend/.env
+*.class
+*.jar
+*.war
+*.ear
+
+# ===== Frontend (Vite / Node) =====
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.production
+
+# ===== Environment / Secrets =====
+.env
+.env.*
+!frontend/.env.development
+
+# ===== IDE =====
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
