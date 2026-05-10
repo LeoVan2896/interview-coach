@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Shell from './components/layout/Shell'
+import DashboardPage from './pages/DashboardPage'
 import LessonsPage from './pages/LessonsPage'
 import LessonDetailPage from './pages/LessonDetailPage'
 import SchedulePage from './pages/SchedulePage'
@@ -47,7 +48,7 @@ export default function App() {
   return (
     <Shell>
       <Routes>
-        <Route path="/"          element={<ComingSoon name="Today's Plan" />} />
+        <Route path="/"          element={<DashboardPage />} />
         <Route path="/roadmap"   element={<DsaRoadmapPage />} />
         <Route path="/roadmap/concept/:topicId" element={<DsaConceptPage />} />
         <Route path="/schedule"  element={<SchedulePage />} />
