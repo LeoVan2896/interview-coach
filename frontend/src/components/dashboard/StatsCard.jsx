@@ -7,7 +7,7 @@ function StatBox({ value, label, color }) {
       flexDirection: 'column',
       alignItems: 'center',
       padding: '10px 8px',
-      background: '#f8fafc',
+      background: 'var(--color-bg)',
       borderRadius: 8,
       border: '1px solid var(--color-border)',
       flex: 1,

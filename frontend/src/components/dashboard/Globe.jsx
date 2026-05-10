@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const STAGE_LABELS = [
   '', 'Dark Ages', 'Stone Age', 'Ancient Civilization', 'Medieval',
@@ -213,16 +213,16 @@ function StageScene({ stage }) {
 export default function Globe({ stage }) {
   const [preview, setPreview] = useState(stage)
 
-  const displayStage = preview
+  useEffect(() => { setPreview(stage) }, [stage])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>
-        Stage {displayStage} — {STAGE_LABELS[displayStage]}
+        Stage {preview} — {STAGE_LABELS[preview]}
       </div>
 
       <div style={{ width: '100%', maxWidth: 200, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-        <StageScene stage={displayStage} />
+        <StageScene stage={preview} />
       </div>
 
       <input

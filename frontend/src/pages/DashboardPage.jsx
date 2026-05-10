@@ -57,7 +57,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {!loading && (
+      {!loading && !error && (
         <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* Row 1: 3 Pillar Cards */}
@@ -67,11 +67,11 @@ export default function DashboardPage() {
               icon="📖"
               label="Learning"
               badge={plan ? `Week ${plan.currentWeek}` : ''}
-              title={tasks?.learning.topic ?? '--'}
-              desc={tasks?.learning.desc}
+              title={tasks?.learning?.topic ?? '--'}
+              desc={tasks?.learning?.desc}
               buttonLabel="Open Lesson →"
               onAction={() => {
-                const id = tasks?.learning.lessonId
+                const id = tasks?.learning?.lessonId
                 navigate(id ? `/lessons/${id}` : '/lessons')
               }}
             />
@@ -79,18 +79,18 @@ export default function DashboardPage() {
               color="#8b5cf6"
               icon="⚡"
               label="LeetCode"
-              badge={tasks?.leetcode.pattern}
-              title={`Practice ${tasks?.leetcode.pattern ?? ''}`}
-              desc={tasks?.leetcode.problems}
+              badge={tasks?.leetcode?.pattern}
+              title={`Practice ${tasks?.leetcode?.pattern ?? ''}`}
+              desc={tasks?.leetcode?.problems}
               buttonLabel="Practice →"
-              onAction={() => navigate(`/roadmap/concept/${tasks?.leetcode.topicId}`)}
+              onAction={() => navigate(tasks?.leetcode?.topicId ? `/roadmap/concept/${tasks.leetcode.topicId}` : '/roadmap')}
             />
             <PillarCard
               color="#10b981"
               icon="🔨"
               label="Project"
               badge={plan ? `Week ${plan.currentWeek} · Build` : ''}
-              title={tasks?.project.task ?? '--'}
+              title={tasks?.project?.task ?? '--'}
               desc={null}
               buttonLabel="View Schedule"
               onAction={() => navigate('/schedule')}
