@@ -3,6 +3,7 @@ import Shell from './components/layout/Shell'
 import LessonsPage from './pages/LessonsPage'
 import LessonDetailPage from './pages/LessonDetailPage'
 import SchedulePage from './pages/SchedulePage'
+import DsaRoadmapPage from './pages/DsaRoadmapPage'
 
 function PracticePage() {
   const location = useLocation()
@@ -46,7 +47,7 @@ export default function App() {
     <Shell>
       <Routes>
         <Route path="/"          element={<ComingSoon name="Today's Plan" />} />
-        <Route path="/roadmap"   element={<ComingSoon name="DSA Roadmap" />} />
+        <Route path="/roadmap"   element={<DsaRoadmapPage />} />
         <Route path="/schedule"  element={<SchedulePage />} />
         <Route path="/lessons"   element={<LessonsPage />} />
         <Route path="/lessons/:id" element={<LessonDetailPage />} />
