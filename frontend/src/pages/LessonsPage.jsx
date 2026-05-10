@@ -2,16 +2,13 @@ import { useState, useMemo } from 'react'
 import Topbar from '../components/layout/Topbar'
 import CategorySidebar from '../components/lessons/CategorySidebar'
 import LessonCard from '../components/lessons/LessonCard'
-import LessonDetailPanel from '../components/lessons/LessonDetailPanel'
 import { useLessons } from '../hooks/useLessons'
 
 export default function LessonsPage() {
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [statusFilter,   setStatusFilter]   = useState('all')
   const [searchQuery,    setSearchQuery]     = useState('')
-  const [selectedLesson, setSelectedLesson]  = useState(null)
-
-  const { lessons, loading, error, updateStatus } = useLessons(categoryFilter, statusFilter)
+  const { lessons, loading, error } = useLessons(categoryFilter, statusFilter)
 
   // Client-side search: filter already-fetched lessons by title or description.
   const filteredLessons = useMemo(() => {
@@ -24,13 +21,6 @@ export default function LessonsPage() {
   }, [lessons, searchQuery])
 
   const doneCount = lessons.filter(l => l.status === 'DONE').length
-
-  const handleStatusChange = async (id, newStatus) => {
-    const updated = await updateStatus(id, newStatus)
-    if (selectedLesson?.id === id) {
-      setSelectedLesson(prev => ({ ...prev, status: updated.status }))
-    }
-  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -80,12 +70,7 @@ export default function LessonsPage() {
           {!loading && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
               {filteredLessons.map(lesson => (
-                <LessonCard
-                  key={lesson.id}
-                  lesson={lesson}
-                  isSelected={selectedLesson?.id === lesson.id}
-                  onClick={setSelectedLesson}
-                />
+                <LessonCard key={lesson.id} lesson={lesson} />
               ))}
               {filteredLessons.length === 0 && (
                 <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 40, color: 'var(--color-text-faint)' }}>
@@ -96,13 +81,6 @@ export default function LessonsPage() {
           )}
         </div>
 
-        {selectedLesson && (
-          <LessonDetailPanel
-            lesson={selectedLesson}
-            onClose={() => setSelectedLesson(null)}
-            onStatusChange={handleStatusChange}
-          />
-        )}
       </div>
     </div>
   )

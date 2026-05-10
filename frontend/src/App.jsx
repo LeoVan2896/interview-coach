@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Shell from './components/layout/Shell'
 import LessonsPage from './pages/LessonsPage'
+import LessonDetailPage from './pages/LessonDetailPage'
 import SchedulePage from './pages/SchedulePage'
 
 function PracticePage() {
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/roadmap"   element={<ComingSoon name="DSA Roadmap" />} />
         <Route path="/schedule"  element={<SchedulePage />} />
         <Route path="/lessons"   element={<LessonsPage />} />
+        <Route path="/lessons/:id" element={<LessonDetailPage />} />
         <Route path="/practice"  element={<PracticePage />} />
         <Route path="/sessions"  element={<ComingSoon name="History" />} />
         <Route path="/settings"  element={<ComingSoon name="Settings" />} />

@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom'
+
 const CAT_COLOR = {
   JAVA_CORE:       'linear-gradient(90deg,#2563eb,#60a5fa)',
   SPRING_BOOT:     'linear-gradient(90deg,#16a34a,#34d399)',
@@ -23,7 +25,8 @@ const LEVEL_STYLE = {
 
 const STATUS_ICON = { DONE: '✅', IN_PROGRESS: '▶', NOT_STARTED: '○' }
 
-export default function LessonCard({ lesson, isSelected, onClick }) {
+export default function LessonCard({ lesson }) {
+  const navigate = useNavigate()
   const cardBg = lesson.status === 'DONE'
     ? '#fafffe'
     : lesson.status === 'IN_PROGRESS'
@@ -34,17 +37,15 @@ export default function LessonCard({ lesson, isSelected, onClick }) {
 
   return (
     <div
-      onClick={() => onClick(lesson)}
+      onClick={() => navigate(`/lessons/${lesson.id}`)}
       style={{
         background: cardBg,
-        border: `1.5px solid ${isSelected ? '#93c5fd' : 'var(--color-border)'}`,
+        border: '1.5px solid var(--color-border)',
         borderRadius: 12,
         cursor: 'pointer',
         overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
-        boxShadow: isSelected
-          ? '0 0 0 3px rgba(37,99,235,.15)'
-          : '0 1px 3px rgba(0,0,0,.04)',
+        boxShadow: '0 1px 3px rgba(0,0,0,.04)',
         transition: 'all .15s',
       }}
     >
