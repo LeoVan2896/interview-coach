@@ -30,9 +30,9 @@ export function useSchedule() {
  * @param {number|null} weekNum
  */
 export function useWeekDetail(weekNum) {
-  const [weekDetail, setWeekDetail] = useState(null)
-  const [loading, setLoading]       = useState(false)
-  const [error, setError]           = useState(null)
+  const [detail, setDetail]   = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState(null)
 
   useEffect(() => {
     if (!weekNum) return
@@ -42,12 +42,12 @@ export function useWeekDetail(weekNum) {
     setError(null)
 
     fetchWeekByNum(weekNum)
-      .then(data => { if (!cancelled) setWeekDetail(data) })
+      .then(data => { if (!cancelled) setDetail(data) })
       .catch(err  => { if (!cancelled) setError(err.message) })
       .finally(()  => { if (!cancelled) setLoading(false) })
 
     return () => { cancelled = true }
   }, [weekNum])
 
-  return { weekDetail, loading, error }
+  return { detail, loading, error }
 }

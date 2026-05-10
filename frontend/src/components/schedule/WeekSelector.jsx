@@ -1,5 +1,5 @@
 // frontend/src/components/schedule/WeekSelector.jsx
-export default function WeekSelector({ weeks, activeWeekNum, onSelect }) {
+export default function WeekSelector({ weeks, selectedWeekNum, onSelect }) {
   return (
     <div style={{
       display: 'flex',
@@ -10,7 +10,7 @@ export default function WeekSelector({ weeks, activeWeekNum, onSelect }) {
       flexShrink: 0,
     }}>
       {weeks.map(week => {
-        const isActive = week.weekNum === activeWeekNum
+        const isActive = week.weekNum === selectedWeekNum
         return (
           <button
             key={week.weekNum}
@@ -23,8 +23,8 @@ export default function WeekSelector({ weeks, activeWeekNum, onSelect }) {
               border: isActive
                 ? '1.5px solid var(--color-blue)'
                 : '1.5px solid var(--color-border)',
-              background: isActive ? '#eff6ff' : '#fff',
-              color: isActive ? 'var(--color-blue)' : 'var(--color-text-faint)',
+              background: isActive ? 'var(--color-blue)' : '#fff',
+              color: isActive ? '#fff' : 'var(--color-text-faint)',
               fontWeight: isActive ? 700 : 400,
               fontSize: 12,
               cursor: 'pointer',

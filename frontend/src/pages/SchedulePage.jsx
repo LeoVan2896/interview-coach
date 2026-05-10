@@ -9,7 +9,7 @@ export default function SchedulePage() {
   const [selectedWeekNum, setSelectedWeekNum] = useState(1)
 
   const { weeks, loading: weeksLoading, error: weeksError } = useSchedule()
-  const { weekDetail, loading: detailLoading, error: detailError } = useWeekDetail(selectedWeekNum)
+  const { detail, loading: detailLoading, error: detailError } = useWeekDetail(selectedWeekNum)
 
   const activeWeek = weeks.find(w => w.weekNum === selectedWeekNum)
 
@@ -48,14 +48,14 @@ export default function SchedulePage() {
       {!weeksLoading && weeks.length > 0 && (
         <WeekSelector
           weeks={weeks}
-          activeWeekNum={selectedWeekNum}
+          selectedWeekNum={selectedWeekNum}
           onSelect={setSelectedWeekNum}
         />
       )}
 
       <div style={{ flex: 1, overflowY: 'auto' }}>
         <DailyTable
-          weekDetail={weekDetail}
+          weekDetail={detail}
           loading={detailLoading}
           error={detailError}
         />
