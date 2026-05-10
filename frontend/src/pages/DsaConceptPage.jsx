@@ -771,8 +771,8 @@ export default function DsaConceptPage() {
         {/* Common Interview Patterns */}
         <Section title="Common Interview Patterns">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-            {concept.patterns.map((p, i) => (
-              <div key={i} style={{
+            {(concept.patterns ?? []).map((p, i) => (
+              <div key={p.name || i} style={{
                 background: '#161b22',
                 border: '1px solid #21262d',
                 borderLeft: '3px solid #388bfd',
