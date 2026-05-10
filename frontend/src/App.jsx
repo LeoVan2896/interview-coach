@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Shell from './components/layout/Shell'
 import LessonsPage from './pages/LessonsPage'
+import SchedulePage from './pages/SchedulePage'
 
 function ComingSoon({ name }) {
   return (
@@ -18,7 +19,7 @@ export default function App() {
       <Routes>
         <Route path="/"          element={<ComingSoon name="Today's Plan" />} />
         <Route path="/roadmap"   element={<ComingSoon name="DSA Roadmap" />} />
-        <Route path="/schedule"  element={<ComingSoon name="8-Week Schedule" />} />
+        <Route path="/schedule"  element={<SchedulePage />} />
         <Route path="/lessons"   element={<LessonsPage />} />
         <Route path="/practice"  element={<ComingSoon name="Interview Practice" />} />
         <Route path="/sessions"  element={<ComingSoon name="History" />} />
