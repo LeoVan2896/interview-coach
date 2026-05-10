@@ -1,5 +1,13 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { TOPICS } from '../data/dsaData'
+
+const LS_KEY = 'dsa_progress'
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') }
+  catch { return {} }
+}
 
 const TOPIC_MAP = Object.fromEntries(TOPICS.map(t => [t.id, t]))
 
@@ -729,6 +737,19 @@ export default function DsaConceptPage() {
   const topic = TOPIC_MAP[topicId]
   const concept = CONCEPTS[topicId]
 
+  // Hooks must be called unconditionally — before any early return
+  const [progress, setProgress] = useState(loadProgress)
+
+  function toggleProblem(problemId) {
+    setProgress(prev => {
+      const next = { ...prev }
+      if (next[problemId]) delete next[problemId]
+      else next[problemId] = true
+      localStorage.setItem(LS_KEY, JSON.stringify(next))
+      return next
+    })
+  }
+
   if (!topic || !concept) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#8b949e', flexDirection: 'column', gap: 12 }}>
@@ -738,6 +759,9 @@ export default function DsaConceptPage() {
       </div>
     )
   }
+
+  const problems = TOPIC_MAP[topicId]?.problems ?? []
+  const solvedCount = problems.filter(p => progress[p.id]).length
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', background: '#0d1117', color: '#c9d1d9' }}>
@@ -834,6 +858,80 @@ export default function DsaConceptPage() {
           }}>
             <code>{concept.code}</code>
           </pre>
+        </Section>
+
+        {/* Practice Problems */}
+        <Section title={`Practice Problems · ${solvedCount} / ${problems.length}`}>
+          {problems.length === 0 ? (
+            <div style={{ fontSize: 13, color: '#8b949e', fontStyle: 'italic' }}>
+              No problems listed for this topic.
+            </div>
+          ) : (
+            problems.map(p => (
+              <div
+                key={p.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '8px 0',
+                  borderBottom: '1px solid #21262d',
+                  cursor: 'pointer',
+                }}
+                onClick={() => toggleProblem(p.id)}
+              >
+                {/* Checkbox */}
+                <div style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: 3,
+                  flexShrink: 0,
+                  border: `2px solid ${progress[p.id] ? '#388bfd' : '#30363d'}`,
+                  background: progress[p.id] ? '#388bfd' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  {progress[p.id] && (
+                    <span style={{ color: '#fff', fontSize: 10, fontWeight: 700 }}>✓</span>
+                  )}
+                </div>
+
+                {/* Title */}
+                <span style={{
+                  flex: 1,
+                  fontSize: 13,
+                  color: progress[p.id] ? '#8b949e' : '#f0f6fc',
+                  textDecoration: progress[p.id] ? 'line-through' : 'none',
+                }}>
+                  {p.title}
+                </span>
+
+                {/* Difficulty badge */}
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  borderRadius: 99,
+                  padding: '2px 8px',
+                  color: p.difficulty === 'Easy' ? '#3fb950' : p.difficulty === 'Medium' ? '#d29922' : '#f85149',
+                  background: p.difficulty === 'Easy' ? 'rgba(63,185,80,.1)' : p.difficulty === 'Medium' ? 'rgba(210,153,34,.1)' : 'rgba(248,81,73,.1)',
+                }}>
+                  {p.difficulty}
+                </span>
+
+                {/* LeetCode link */}
+                <a
+                  href={p.leetcodeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  style={{ fontSize: 12, color: '#58a6ff', textDecoration: 'none' }}
+                >
+                  ↗
+                </a>
+              </div>
+            ))
+          )}
         </Section>
 
       </div>
