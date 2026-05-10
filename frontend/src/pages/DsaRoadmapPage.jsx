@@ -50,6 +50,12 @@ export default function DsaRoadmapPage() {
     })
   }
 
+  function resetProgress() {
+    if (!window.confirm('Reset all progress? This cannot be undone.')) return
+    localStorage.removeItem(LS_KEY)
+    setProgress({})
+  }
+
   const overallPct = TOTAL_PROBLEMS > 0 ? (totalSolved / TOTAL_PROBLEMS) * 100 : 0
 
   return (
@@ -65,6 +71,23 @@ export default function DsaRoadmapPage() {
         <div style={{ width: 120, height: 4, background: '#21262d', borderRadius: 99, overflow: 'hidden' }}>
           <div style={{ width: `${overallPct}%`, height: '100%', background: '#388bfd', borderRadius: 99, transition: 'width .3s' }} />
         </div>
+        <button
+          onClick={resetProgress}
+          style={{
+            padding: '3px 10px',
+            borderRadius: 99,
+            fontSize: 11,
+            fontWeight: 600,
+            cursor: 'pointer',
+            background: 'transparent',
+            border: '1px solid #f85149',
+            color: '#f85149',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(248,81,73,.1)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+        >
+          Reset
+        </button>
       </div>
 
       {/* BODY */}
