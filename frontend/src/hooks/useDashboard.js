@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { fetchDashboardToday } from '../api/dashboard.js'
-import { TOPICS } from '../data/dsaData.js'
+import { TOPICS, TOTAL_PROBLEMS } from '../data/dsaData.js'
 
 const LS_KEY = 'dsa_progress'
+const TOTAL_LESSONS = 60
 
 export function useDashboard() {
   const [data, setData] = useState(null)
@@ -10,8 +11,12 @@ export function useDashboard() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    let cancelled = false
+
     fetchDashboardToday()
       .then(serverData => {
+        if (cancelled) return
+
         let progress = {}
         try {
           progress = JSON.parse(localStorage.getItem(LS_KEY) || '{}')
@@ -28,13 +33,15 @@ export function useDashboard() {
 
         const lessonsDone = serverData.stats.lessonsDone
         const globePercent =
-          ((lessonsDone / 60) * 0.5 + (problemsDone / 150) * 0.5) * 100
+          ((lessonsDone / TOTAL_LESSONS) * 0.5 + (problemsDone / TOTAL_PROBLEMS) * 0.5) * 100
         const globeStage = Math.min(9, Math.floor(globePercent / 11.11) + 1)
 
-        setData({ ...serverData, problemsDone, dsaProgress, globeStage })
+        if (!cancelled) setData({ ...serverData, problemsDone, dsaProgress, globeStage })
       })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
+      .catch(err => { if (!cancelled) setError(err.message || String(err)) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+
+    return () => { cancelled = true }
   }, [])
 
   return { data, loading, error }
