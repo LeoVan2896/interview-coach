@@ -1,22 +1,24 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { TOPICS, TOTAL_PROBLEMS } from '../data/dsaData'
 
-const NODE_HEIGHT = 44
-const CANVAS_W = 680
-const CANVAS_H = 710
+const SCALE = 1.3
+const NODE_HEIGHT = 44 * SCALE
+const CANVAS_W = 680 * SCALE
+const CANVAS_H = 710 * SCALE
 const LS_KEY = 'dsa_progress'
 
 const TOPIC_MAP = Object.fromEntries(TOPICS.map(t => [t.id, t]))
 
 const ARROW_LINES = []
 TOPICS.forEach(src => {
-  const srcCx = src.pos.left + src.width / 2
-  const srcBot = src.pos.top + NODE_HEIGHT
+  const srcCx = (src.pos.left + src.width / 2) * SCALE
+  const srcBot = (src.pos.top + 44) * SCALE
   src.edges.forEach(dstId => {
     const dst = TOPIC_MAP[dstId]
     if (!dst) return
-    const dstCx = dst.pos.left + dst.width / 2
-    const dstTop = dst.pos.top
+    const dstCx = (dst.pos.left + dst.width / 2) * SCALE
+    const dstTop = dst.pos.top * SCALE
     ARROW_LINES.push({ x1: srcCx, y1: srcBot, x2: dstCx, y2: dstTop })
   })
 })
@@ -29,6 +31,7 @@ function loadProgress() {
 export default function DsaRoadmapPage() {
   const [selectedId, setSelectedId] = useState(null)
   const [progress, setProgress] = useState(loadProgress)
+  const navigate = useNavigate()
 
   const selectedTopic = selectedId ? TOPIC_MAP[selectedId] : null
   const totalSolved = Object.keys(progress).length
@@ -50,7 +53,7 @@ export default function DsaRoadmapPage() {
   const overallPct = TOTAL_PROBLEMS > 0 ? (totalSolved / TOTAL_PROBLEMS) * 100 : 0
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', background: '#0d1117', color: '#c9d1d9' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', background: '#d9d9d9', color: '#c9d1d9' }}>
 
       {/* NAV BAR */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '9px 16px', background: '#161b22', borderBottom: '1px solid #21262d', flexShrink: 0 }}>
@@ -68,7 +71,7 @@ export default function DsaRoadmapPage() {
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
         {/* GRAPH AREA */}
-        <div style={{ flex: 1, overflow: 'auto', background: '#0d1117', position: 'relative' }}>
+        <div style={{ flex: 1, overflow: 'auto', background: '#d9d9d9', position: 'relative' }}>
           <div style={{ position: 'relative', width: CANVAS_W, height: CANVAS_H, margin: '20px auto' }}>
 
             {/* SVG arrows */}
@@ -108,9 +111,9 @@ export default function DsaRoadmapPage() {
                   onClick={() => selectTopic(topic.id)}
                   style={{
                     position: 'absolute',
-                    left: topic.pos.left,
-                    top: topic.pos.top,
-                    width: topic.width,
+                    left: topic.pos.left * SCALE,
+                    top: topic.pos.top * SCALE,
+                    width: topic.width * SCALE,
                     background: bg,
                     border: `1px solid ${border}`,
                     boxShadow,
@@ -142,6 +145,7 @@ export default function DsaRoadmapPage() {
               progress={progress}
               onClose={() => setSelectedId(null)}
               onToggle={toggleProblem}
+              onLearnConcept={() => navigate(`/roadmap/concept/${selectedTopic.id}`)}
             />
           ) : (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8, color: '#8b949e' }}>
@@ -156,7 +160,7 @@ export default function DsaRoadmapPage() {
   )
 }
 
-function RightPanel({ topic, progress, onClose, onToggle }) {
+function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
   const solvedCount = topic.problems.filter(p => progress[p.id]).length
   const total = topic.problems.length
   const pct = total > 0 ? (solvedCount / total) * 100 : 0
@@ -197,12 +201,41 @@ function RightPanel({ topic, progress, onClose, onToggle }) {
         )}
       </div>
 
+      {/* Learn Concept button */}
+      <div style={{ padding: '10px 18px', borderBottom: '1px solid #21262d', flexShrink: 0 }}>
+        <button
+          onClick={onLearnConcept}
+          style={{
+            width: '100%',
+            padding: '9px 14px',
+            background: 'linear-gradient(135deg, #1d3d8f 0%, #1a3580 100%)',
+            border: '1px solid #388bfd',
+            borderRadius: 8,
+            color: '#c9d1d9',
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            transition: 'background .15s, border-color .15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #2a4fa8 0%, #2444a0 100%)'; e.currentTarget.style.borderColor = '#58a6ff' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #1d3d8f 0%, #1a3580 100%)'; e.currentTarget.style.borderColor = '#388bfd' }}
+        >
+          <span style={{ fontSize: 15 }}>📖</span>
+          Learn Concept
+          <span style={{ fontSize: 12, color: '#8b949e' }}>→</span>
+        </button>
+      </div>
+
       {/* Problem table */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {/* Table header */}
-        <div style={{ display: 'grid', gridTemplateColumns: '34px 34px 1fr 76px 52px', padding: '7px 12px', borderBottom: '1px solid #21262d', position: 'sticky', top: 0, background: '#161b22', zIndex: 2 }}>
-          {['Status', 'Star', 'Problem', 'Difficulty', 'Solution'].map((h, i) => (
-            <div key={h} style={{ fontSize: 10.5, fontWeight: 600, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '.5px', textAlign: i !== 2 ? 'center' : 'left' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '54px 1fr 76px 52px', padding: '7px 12px', borderBottom: '1px solid #21262d', position: 'sticky', top: 0, background: '#161b22', zIndex: 2 }}>
+          {['Status', 'Problem', 'Difficulty', 'Solution'].map((h, i) => (
+            <div key={h} style={{ fontSize: 10.5, fontWeight: 600, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '.5px', textAlign: i !== 1 ? 'center' : 'left' }}>
               {h}
             </div>
           ))}
@@ -215,7 +248,7 @@ function RightPanel({ topic, progress, onClose, onToggle }) {
           return (
             <div
               key={prob.id}
-              style={{ display: 'grid', gridTemplateColumns: '34px 34px 1fr 76px 52px', padding: '8px 12px', borderBottom: '1px solid rgba(33,38,45,.8)', alignItems: 'center', cursor: 'pointer', transition: 'background .1s' }}
+              style={{ display: 'grid', gridTemplateColumns: '54px 1fr 76px 52px', padding: '8px 12px', borderBottom: '1px solid rgba(33,38,45,.8)', alignItems: 'center', cursor: 'pointer', transition: 'background .1s' }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.03)'}
               onMouseLeave={e => e.currentTarget.style.background = ''}
             >
@@ -226,9 +259,6 @@ function RightPanel({ topic, progress, onClose, onToggle }) {
               >
                 {done && <span style={{ color: '#fff', fontSize: 9, fontWeight: 700 }}>✓</span>}
               </div>
-
-              {/* Star */}
-              <div style={{ textAlign: 'center', fontSize: 13, color: '#e3b341', opacity: .35 }}>★</div>
 
               {/* Problem name + link */}
               <div style={{ fontSize: 12.5, color: '#c9d1d9', display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
