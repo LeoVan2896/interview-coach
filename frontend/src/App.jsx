@@ -4,6 +4,7 @@ import LessonsPage from './pages/LessonsPage'
 import LessonDetailPage from './pages/LessonDetailPage'
 import SchedulePage from './pages/SchedulePage'
 import DsaRoadmapPage from './pages/DsaRoadmapPage'
+import DsaConceptPage from './pages/DsaConceptPage'
 
 function PracticePage() {
   const location = useLocation()
@@ -48,6 +49,7 @@ export default function App() {
       <Routes>
         <Route path="/"          element={<ComingSoon name="Today's Plan" />} />
         <Route path="/roadmap"   element={<DsaRoadmapPage />} />
+        <Route path="/roadmap/concept/:topicId" element={<DsaConceptPage />} />
         <Route path="/schedule"  element={<SchedulePage />} />
         <Route path="/lessons"   element={<LessonsPage />} />
         <Route path="/lessons/:id" element={<LessonDetailPage />} />
