@@ -2,7 +2,7 @@
 -- plans: the 8-week study plan definition (one row)
 -- Columns: id (primary key), start_date, end_date
 
-CREATE TABLE plans (
+CREATE TABLE IF NOT EXISTS plans (
   id         BIGSERIAL PRIMARY KEY,
   start_date DATE      NOT NULL,
   end_date   DATE      NOT NULL
