@@ -34,8 +34,8 @@ public class Lesson {
     @Column(name = "content_html", columnDefinition = "TEXT")
     private String contentHtml;
 
-    @Column(name = "fiserv_note", columnDefinition = "TEXT")
-    private String fiservNote;
+    @Column(name = "company_note", columnDefinition = "TEXT")
+    private String companyNote;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -71,8 +71,8 @@ public class Lesson {
     public String getContentHtml() { return contentHtml; }
     public void setContentHtml(String contentHtml) { this.contentHtml = contentHtml; }
 
-    public String getFiservNote() { return fiservNote; }
-    public void setFiservNote(String fiservNote) { this.fiservNote = fiservNote; }
+    public String getCompanyNote() { return companyNote; }
+    public void setCompanyNote(String companyNote) { this.companyNote = companyNote; }
 
     public LessonStatus getStatus() { return status; }
     public void setStatus(LessonStatus status) { this.status = status; }

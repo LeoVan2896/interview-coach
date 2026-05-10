@@ -89,7 +89,7 @@ public class LessonServiceImpl implements LessonService {
                 l.getStatus().name(),
                 l.getSortOrder(),
                 l.getContentHtml(),
-                l.getFiservNote()
+                l.getCompanyNote()
         );
     }
 }

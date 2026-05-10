@@ -83,10 +83,10 @@ export default function LessonDetailPanel({ lesson, onClose, onStatusChange }) {
           </div>
         )}
 
-        {!loading && detail?.fiservNote && (
+        {!loading && detail?.companyNote && (
           <div style={{ margin: '10px 14px 0', background: '#fffbeb', border: '1px solid #fde68a', borderLeft: '3px solid #f59e0b', borderRadius: 8, padding: '9px 11px' }}>
-            <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.8px', color: '#b45309', marginBottom: 5 }}>🏦 Fiserv Context</div>
-            <p style={{ fontSize: 11.5, color: '#78350f', lineHeight: 1.5 }}>{detail.fiservNote}</p>
+            <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.8px', color: '#b45309', marginBottom: 5 }}>💼 Work Context</div>
+            <p style={{ fontSize: 11.5, color: '#78350f', lineHeight: 1.5 }}>{detail.companyNote}</p>
           </div>
         )}
 

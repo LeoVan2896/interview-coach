@@ -1,0 +1,128 @@
+package com.interviewcoach.service;
+
+import com.interviewcoach.dto.*;
+import com.interviewcoach.model.Message;
+import com.interviewcoach.model.Session;
+import com.interviewcoach.model.Topic;
+import com.interviewcoach.repository.MessageRepository;
+import com.interviewcoach.repository.SessionRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+// @Transactional at class level means every public method runs in a transaction by default.
+// Individual methods can override with @Transactional(readOnly = true) for SELECT-only paths
+// — this hint lets the DB skip dirty-checking and can improve performance.
+@Service
+@Transactional
+public class SessionService {
+
+    private final SessionRepository sessionRepository;
+    private final MessageRepository messageRepository;
+    private final AnthropicService anthropicService;
+
+    public SessionService(
+            SessionRepository sessionRepository,
+            MessageRepository messageRepository,
+            AnthropicService anthropicService) {
+        this.sessionRepository = sessionRepository;
+        this.messageRepository = messageRepository;
+        this.anthropicService = anthropicService;
+    }
+
+    public SessionDetail createSession(CreateSessionRequest request) {
+        Topic topic = Topic.valueOf(request.topic());
+
+        Session session = new Session();
+        session.setTopic(topic);
+        session.setQuestionText(request.questionText());
+        session.setQuestionHint(request.questionHint());
+        session.setQuestionType(request.questionType());
+        session = sessionRepository.save(session);
+
+        return SessionDetail.from(session, List.of());
+    }
+
+    @Transactional(readOnly = true)
+    public List<SessionSummary> getAllSessions() {
+        // TODO: replace per-session COUNT with a single GROUP BY query for large datasets
+        return sessionRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
+                .stream()
+                .map(s -> SessionSummary.from(s, messageRepository.countBySessionId(s.getId())))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public SessionDetail getSession(UUID id) {
+        Session session = findSessionById(id);
+        List<Message> messages = messageRepository.findBySessionIdOrderByCreatedAtAsc(id);
+        return SessionDetail.from(session, messages);
+    }
+
+    public MessageDto sendMessage(UUID sessionId, String userContent) {
+        Session session = findSessionById(sessionId);
+        List<Message> history = messageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+
+        Message userMessage = new Message();
+        userMessage.setSession(session);
+        userMessage.setRole(Message.Role.USER);
+        userMessage.setContent(userContent);
+        messageRepository.save(userMessage);
+
+        // Full conversation history is sent to Claude on every turn for context.
+        String aiReply = anthropicService.chat(
+                session.getTopic().getLabel(),
+                session.getQuestionText(),
+                session.getQuestionType(),
+                history,
+                userContent
+        );
+
+        Message assistantMessage = new Message();
+        assistantMessage.setSession(session);
+        assistantMessage.setRole(Message.Role.ASSISTANT);
+        assistantMessage.setContent(aiReply);
+        assistantMessage = messageRepository.save(assistantMessage);
+
+        return MessageDto.from(assistantMessage);
+    }
+
+    public MessageDto generateScorecard(UUID sessionId) {
+        Session session = findSessionById(sessionId);
+        List<Message> history = messageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+
+        String scorecard = anthropicService.generateScorecard(
+                session.getTopic().getLabel(),
+                session.getQuestionText(),
+                session.getQuestionType(),
+                history
+        );
+
+        Message scorecardMessage = new Message();
+        scorecardMessage.setSession(session);
+        scorecardMessage.setRole(Message.Role.ASSISTANT);
+        scorecardMessage.setContent(scorecard);
+        scorecardMessage = messageRepository.save(scorecardMessage);
+
+        session.setCompleted(true);
+        sessionRepository.save(session);
+
+        return MessageDto.from(scorecardMessage);
+    }
+
+    public void deleteSession(UUID id) {
+        if (!sessionRepository.existsById(id)) {
+            throw new EntityNotFoundException("Session not found: " + id);
+        }
+        sessionRepository.deleteById(id);
+    }
+
+    private Session findSessionById(UUID id) {
+        return sessionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found: " + id));
+    }
+}

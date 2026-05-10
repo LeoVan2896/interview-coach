@@ -29,10 +29,11 @@
 
 **Existing Flyway migrations:**
 - `V1__create_sessions_messages.sql` — sessions + messages + question_type column
-- `V2__create_lessons.sql` — lessons table
+- `V2__create_lessons.sql` — lessons table (with `fiserv_note` column)
 - `V3__seed_lessons.sql` — 6 seed lessons
+- `V4__rename_fiserv_note_to_company_note.sql` — renames `fiserv_note` → `company_note` (**already applied**)
 
-**Next migration numbers:** V4 (schema), V5 (seed)
+**Next migration numbers:** V5 (schema), V6 (seed)
 
 **Existing relevant files you must NOT break:**
 - `com.interviewcoach.config.GlobalExceptionHandler` — already handles your 404/400 cases
@@ -72,15 +73,15 @@
 
 ---
 
-## Task 1: V4 Migration — Create Schedule Tables
+## Task 1: V5 Migration — Create Schedule Tables
 
 **Files:**
-- Create: `backend/src/main/resources/db/migration/V4__create_schedule.sql`
+- Create: `backend/src/main/resources/db/migration/V5__create_schedule.sql`
 
 - [ ] **Step 1: Create the migration file**
 
 ```sql
--- V4__create_schedule.sql
+-- V5__create_schedule.sql
 -- schedule_weeks: one row per week of the 8-week prep plan
 -- schedule_days: one row per day (56 total = 8 weeks × 7 days)
 -- IF NOT EXISTS matches the V1/V2 style used in this project.
@@ -117,26 +118,26 @@ CREATE INDEX idx_schedule_days_week_num ON schedule_days (week_num);
 ```bash
 ls F:\interview-coach\backend\src\main\resources\db\migration\
 ```
-Expected: V1, V2, V3 files plus the new V4__create_schedule.sql
+Expected: V1, V2, V3, V4 files plus the new V5__create_schedule.sql
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add backend/src/main/resources/db/migration/V4__create_schedule.sql
-git commit -m "chore(db): add V4 migration for schedule_weeks and schedule_days tables"
+git add backend/src/main/resources/db/migration/V5__create_schedule.sql
+git commit -m "chore(db): add V5 migration for schedule_weeks and schedule_days tables"
 ```
 
 ---
 
-## Task 2: V5 Migration — Seed All 8 Weeks of Schedule Data
+## Task 2: V6 Migration — Seed All 8 Weeks of Schedule Data
 
 **Files:**
-- Create: `backend/src/main/resources/db/migration/V5__seed_schedule.sql`
+- Create: `backend/src/main/resources/db/migration/V6__seed_schedule.sql`
 
 - [ ] **Step 1: Create the seed migration file with all 8 weeks + 56 days**
 
 ```sql
--- V5__seed_schedule.sql
+-- V6__seed_schedule.sql
 -- 8 week summary rows, then 56 daily schedule rows (8 × 7).
 -- Columns: week_num, theme, focus_java, focus_dsa, focus_project
 
@@ -285,7 +286,7 @@ INSERT INTO schedule_days (week_num, day_num, day_label, learning_topic, learnin
 
 (2, 5, 'Fri',
  'Spring Boot Actuator',
- '/actuator/health, /actuator/metrics, custom HealthIndicator — common in fintech & Fiserv interview questions.',
+ '/actuator/health, /actuator/metrics, custom HealthIndicator — common in production fintech interviews.',
  'https://www.baeldung.com/spring-boot-actuators',
  'Trees',
  'Count Good Nodes in Binary Tree, Validate BST',
@@ -313,7 +314,7 @@ INSERT INTO schedule_days (week_num, day_num, day_label, learning_topic, learnin
 -- ── WEEK 3: Data Access & Testing ─────────────────────────────────────────
 (3, 1, 'Mon',
  'JPA Entities & Relationships',
- '@OneToMany vs @ManyToOne, @JoinColumn, CascadeType options, @MapsId — why Fiserv fintech codebases are full of JPA.',
+ '@OneToMany vs @ManyToOne, @JoinColumn, CascadeType options, @MapsId — why enterprise Java codebases are full of JPA.',
  'https://www.baeldung.com/hibernate-one-to-many',
  'Trees: Level-Order BFS',
  'Binary Tree Level Order Traversal, Binary Tree Right Side View',
@@ -700,15 +701,15 @@ INSERT INTO schedule_days (week_num, day_num, day_label, learning_topic, learnin
 ```bash
 # Count commas in the INSERT to sanity-check you have 56 day rows
 # (each row ends with a closing parenthesis + comma or semicolon)
-grep -c "^(." V5__seed_schedule.sql
+grep -c "^(." V6__seed_schedule.sql
 ```
 Expected: the file exists with both INSERT statements
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add backend/src/main/resources/db/migration/V5__seed_schedule.sql
-git commit -m "chore(db): add V5 migration seeding 8 weeks and 56 daily schedule rows"
+git add backend/src/main/resources/db/migration/V6__seed_schedule.sql
+git commit -m "chore(db): add V6 migration seeding 8 weeks and 56 daily schedule rows"
 ```
 
 ---

@@ -63,7 +63,7 @@ class LessonControllerTest {
     void getById_givenValidId_returns200WithDetail() throws Exception {
         LessonDetailDto detail = new LessonDetailDto(
                 1L, "JAVA_CORE", "Collections", "Desc", "INTERMEDIATE",
-                45, "IN_PROGRESS", 1, "<p>Content</p>", "Fiserv note"
+                45, "IN_PROGRESS", 1, "<p>Content</p>", "Company context note"
         );
         when(lessonService.getLessonById(1L)).thenReturn(detail);
 
@@ -71,7 +71,7 @@ class LessonControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.contentHtml").value("<p>Content</p>"))
-                .andExpect(jsonPath("$.fiservNote").value("Fiserv note"));
+                .andExpect(jsonPath("$.companyNote").value("Company context note"));
     }
 
     @Test

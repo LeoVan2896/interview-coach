@@ -14,7 +14,7 @@ export async function fetchLessons({ category, status } = {}) {
 }
 
 /**
- * Fetches full lesson detail including contentHtml and fiservNote.
+ * Fetches full lesson detail including contentHtml and companyNote.
  * @param {number} id
  * @returns {Promise<LessonDetail>}
  */

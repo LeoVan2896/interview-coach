@@ -94,14 +94,14 @@ class LessonServiceImplTest {
     void getLessonById_givenValidId_returnsDetailDtoWithAllFields() {
         Lesson l = makeLesson(1L, LessonCategory.JAVA_CORE, LessonStatus.IN_PROGRESS);
         l.setContentHtml("<p>Content</p>");
-        l.setFiservNote("Relates to SOAP at Fiserv");
+        l.setCompanyNote("Relates to real-world API design patterns");
         when(lessonRepository.findById(1L)).thenReturn(Optional.of(l));
 
         LessonDetailDto result = lessonService.getLessonById(1L);
 
         assertThat(result.id()).isEqualTo(1L);
         assertThat(result.contentHtml()).isEqualTo("<p>Content</p>");
-        assertThat(result.fiservNote()).isEqualTo("Relates to SOAP at Fiserv");
+        assertThat(result.companyNote()).isEqualTo("Relates to real-world API design patterns");
         assertThat(result.status()).isEqualTo("IN_PROGRESS");
     }
 

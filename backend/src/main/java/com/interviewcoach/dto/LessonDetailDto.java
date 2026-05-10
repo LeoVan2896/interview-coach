@@ -1,6 +1,6 @@
 package com.interviewcoach.dto;
 
-// LessonDetailDto extends the summary shape with contentHtml and fiservNote.
+// LessonDetailDto extends the summary shape with contentHtml and companyNote.
 // Keeping two DTOs (Summary vs Detail) avoids sending large HTML payloads in list endpoints.
 public record LessonDetailDto(
         Long id,
@@ -12,5 +12,5 @@ public record LessonDetailDto(
         String status,
         int sortOrder,
         String contentHtml,
-        String fiservNote
+        String companyNote
 ) {}
