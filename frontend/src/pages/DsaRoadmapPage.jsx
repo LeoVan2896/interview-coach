@@ -302,8 +302,8 @@ function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
       {/* Problem table */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {/* Table header */}
-        <div style={{ display: 'grid', gridTemplateColumns: '54px 1fr 76px 52px', padding: '7px 12px', borderBottom: '1px solid #21262d', position: 'sticky', top: 0, background: '#161b22', zIndex: 2 }}>
-          {['Status', 'Problem', 'Difficulty', 'Solution'].map((h, i) => (
+        <div style={{ display: 'grid', gridTemplateColumns: '54px 1fr 76px', padding: '7px 12px', borderBottom: '1px solid #21262d', position: 'sticky', top: 0, background: '#161b22', zIndex: 2 }}>
+          {['Status', 'Problem', 'Difficulty'].map((h, i) => (
             <div key={h} style={{ fontSize: 10.5, fontWeight: 600, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '.5px', textAlign: i !== 1 ? 'center' : 'left' }}>
               {h}
             </div>
@@ -324,7 +324,7 @@ function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
           return (
             <div
               key={prob.id}
-              style={{ display: 'grid', gridTemplateColumns: '54px 1fr 76px 52px', padding: '8px 12px', borderBottom: '1px solid rgba(33,38,45,.8)', alignItems: 'center', cursor: 'pointer', transition: 'background .1s' }}
+              style={{ display: 'grid', gridTemplateColumns: '54px 1fr 76px', padding: '8px 12px', borderBottom: '1px solid rgba(33,38,45,.8)', alignItems: 'center', cursor: 'pointer', transition: 'background .1s' }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.03)'}
               onMouseLeave={e => e.currentTarget.style.background = ''}
             >
@@ -354,8 +354,7 @@ function RightPanel({ topic, progress, onClose, onToggle, onLearnConcept }) {
               {/* Difficulty */}
               <div style={{ fontSize: 11.5, fontWeight: 600, textAlign: 'center', color: diffColor }}>{prob.difficulty}</div>
 
-              {/* Solution placeholder */}
-              <div style={{ textAlign: 'center', fontSize: 14, color: '#30363d', cursor: 'pointer' }}>📄</div>
+
             </div>
           )
         })}
