@@ -381,7 +381,7 @@ function kClosest(points, k) {
 // 2. If heap size > k, pop the farthest
 // 3. Remaining k elements are the closest`,
     patterns: [
-      { name: 'Keep Top-K with Min-Heap', signal: 'Maintain a min-heap of size k. When size exceeds k, pop the minimum. What remains is the k largest.', example: 'Top K Frequent Elements' },
+      { name: 'Keep Top-K with Min-Heap', signal: 'Push each element into a min-heap; if size exceeds k, pop the minimum (discards the smallest). The k elements remaining are the k largest. O(n log k).', example: 'Top K Frequent Elements' },
       { name: 'Two-Heap Split', signal: 'A max-heap for the lower half and a min-heap for the upper half. Rebalance after each insert so sizes differ by at most 1. Median = top of the larger heap.', example: 'Find Median from Data Stream' },
       { name: 'Merge K Sorted with Min-Heap', signal: 'Push the head of each list into a min-heap keyed by value. Pop minimum, push its successor. Runs in O(n log k).', example: 'Merge K Sorted Lists' },
     ],
@@ -672,7 +672,7 @@ function getSum(a, b) {
       { name: 'XOR Self-Cancellation', signal: 'XOR all elements; duplicates cancel to 0, the unique element remains. Works because a ^ a = 0 and a ^ 0 = a.', example: 'Single Number' },
       { name: 'Clear Lowest Set Bit', signal: 'n &= (n - 1) removes the rightmost 1-bit. Loop count = number of set bits.', example: 'Number of 1 Bits' },
       { name: 'Isolate / Check Bit', signal: '(n >> i) & 1 reads bit i. n | (1 << i) sets it. n & ~(1 << i) clears it.', example: 'Reverse Bits' },
-      { name: 'Bitmask for Subsets', signal: 'Represent a subset of n elements as an integer 0 to 2ⁿ-1. Bit i is set if element i is included. Iterate all subsets in O(2ⁿ).', example: 'Sum of Two Integers' },
+      { name: 'Bitmask for Subsets', signal: 'Represent a subset of n elements as an integer 0 to 2ⁿ-1. Bit i is set if element i is included. Iterate all subsets in O(2ⁿ).', example: 'Counting Bits' },
     ],
   },
 
