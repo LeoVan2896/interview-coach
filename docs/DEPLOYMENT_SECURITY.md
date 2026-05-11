@@ -4,17 +4,47 @@ Before deploying interview-coach with Docker, ensure the following security prac
 
 ## Environment Variables
 
-- [ ] Set strong, unique passwords for `DB_PASSWORD` (PostgreSQL)
-- [ ] Set strong, unique password for `PGADMIN_PASSWORD`
-- [ ] Set valid `ANTHROPIC_API_KEY` from [https://console.anthropic.com](https://console.anthropic.com)
-- [ ] Never commit actual secrets to git
-- [ ] Use `.env.production` as a template only; create local `.env` with real values
-- [ ] Copy `.env.production` to `.env` locally before running `docker-compose up`
+Before deploying to production, set strong credentials:
 
+### Environment Variable Reference
+
+| Variable | Purpose | Required? | Example |
+|----------|---------|-----------|---------|
+| `DB_NAME` | PostgreSQL database name | Yes | `interviewdb` |
+| `DB_USER` | PostgreSQL database user | Yes | `postgres` |
+| `DB_PASSWORD` | PostgreSQL user password | Yes | `Db@Prod2026#SecurePass!` |
+| `PGADMIN_EMAIL` | pgAdmin login email | Yes | `admin@interview-coach.local` |
+| `PGADMIN_PASSWORD` | pgAdmin login password | Yes | `Pgadmin@2026#SecurePass!` |
+| `ANTHROPIC_API_KEY` | Claude API key from console.anthropic.com | Yes | `sk-ant-xxxxxxxxxxxxxxxxxxxxx` |
+
+**Security Notes:**
+- All passwords must be strong (16+ chars, mixed case, numbers, symbols)
+- Store `.env` file securely; never commit to version control
+- Rotate `ANTHROPIC_API_KEY` quarterly
+- Update passwords immediately if exposed
+
+### Password Setup Checklist
+
+- [ ] Set **strong, unique password** for `DB_PASSWORD` (PostgreSQL)
+  - Minimum 16 characters
+  - Must include: uppercase, lowercase, numbers, special characters
+  - Example: `Db@Prod2026#SecurePass!`
+- [ ] Set **strong, unique password** for `PGADMIN_PASSWORD`
+  - Same requirements as DB_PASSWORD
+- [ ] Set valid `ANTHROPIC_API_KEY` from [https://console.anthropic.com](https://console.anthropic.com)
+  - Must start with `sk-ant-`
+  - Never share or commit to version control
+  - Rotate quarterly or after suspected compromise
+- [ ] Never commit actual secrets to git
+- [ ] Use `.env.production` as a template only
+- [ ] Create local `.env` with real values
+
+Setup:
 ```bash
 cp .env.production .env
 # Edit .env with real values
 nano .env  # or your editor
+# docker-compose will load this file
 ```
 
 ## Docker & Container Security
@@ -32,6 +62,65 @@ nano .env  # or your editor
 - [ ] Frontend on `localhost:3000` (nginx handles public access)
 - [ ] Use reverse proxy (Traefik, nginx) in front of frontend for TLS/HTTPS
 - [ ] Set up firewall rules to restrict port access
+
+## Database Backup & Recovery
+
+**Always maintain a backup strategy** — container data is ephemeral.
+
+### Regular Backups
+
+Create a backup script `scripts/backup-db.sh`:
+
+```bash
+#!/bin/bash
+# Backup PostgreSQL database from running container
+BACKUP_DIR="./backups"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="$BACKUP_DIR/interview-coach_$TIMESTAMP.sql"
+
+mkdir -p $BACKUP_DIR
+
+# Dump database from running postgres container
+docker-compose exec -T postgres pg_dump \
+  -U postgres \
+  interviewdb > "$BACKUP_FILE"
+
+# Compress
+gzip "$BACKUP_FILE"
+
+echo "Backup created: ${BACKUP_FILE}.gz"
+
+# Keep only last 7 days of backups
+find $BACKUP_DIR -name "interview-coach_*.sql.gz" -mtime +7 -delete
+```
+
+Run daily with cron:
+```bash
+0 2 * * * cd /path/to/interview-coach && ./scripts/backup-db.sh
+```
+
+### Restore from Backup
+
+```bash
+# List available backups
+ls -lh backups/
+
+# Restore from backup (this will OVERWRITE current data)
+gunzip -c backups/interview-coach_20260511_020000.sql.gz | \
+  docker-compose exec -T postgres psql -U postgres interviewdb
+
+# Verify restore
+docker-compose exec postgres psql -U postgres -d interviewdb -c "\dt"
+```
+
+### Backup Checklist
+
+- [ ] Create and test backup script before going live
+- [ ] Run `./scripts/backup-db.sh` manually to verify it works
+- [ ] Schedule daily backups via cron
+- [ ] Test restore procedure on staging database
+- [ ] Monitor disk space for backups (each backup ~2-5MB)
+- [ ] Consider off-site backup (S3, Google Cloud Storage) for production
 
 ## Production Deployment
 
