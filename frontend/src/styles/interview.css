@@ -457,7 +457,7 @@
 .message-ai   .message-content { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius) var(--radius) var(--radius) 4px; }
 .message-user .message-content { background: var(--accent-dim); color: #fff; border-radius: var(--radius) var(--radius) 4px var(--radius); }
 
-/* ── Scorecard ── */
+/* ── Scorecard (fallback pre render) ── */
 .scorecard-bubble {
   width: 100%;
   background: var(--surface-2);
@@ -475,6 +475,124 @@
   line-height: 1.7;
   color: var(--text);
   white-space: pre;
+}
+
+/* ── Scorecard structured card ── */
+.scorecard-card {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: fadeUp 0.25s ease;
+}
+
+.scorecard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--border-2);
+}
+
+.scorecard-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.scorecard-total-badge {
+  font-size: 20px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border-2);
+  padding: 3px 12px;
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+
+.scorecard-total-max {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.scorecard-scores {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.scorecard-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scorecard-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scorecard-label {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.scorecard-score-text {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.scorecard-bar-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.scorecard-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.scorecard-note {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.scorecard-sections {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.scorecard-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.scorecard-section-body {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 /* ── Thinking dots ── */
