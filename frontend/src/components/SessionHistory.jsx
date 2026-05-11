@@ -8,6 +8,7 @@ export default function SessionHistory() {
   const [sessions, setSessions]     = useState([])
   const [loading, setLoading]       = useState(true)
   const [expandedId, setExpandedId] = useState(null)
+  const [closingId, setClosingId]   = useState(null)
 
   useEffect(() => {
     api.getSessions().then(({ data }) => {
@@ -22,13 +23,22 @@ export default function SessionHistory() {
     const { error } = await api.deleteSession(id)
     if (!error) {
       setSessions(prev => prev.filter(s => s.id !== id))
-      // Collapse if the deleted session was expanded
       if (expandedId === id) setExpandedId(null)
+      if (closingId === id) setClosingId(null)
     }
   }
 
   function toggleExpand(id) {
-    setExpandedId(prev => (prev === id ? null : id))
+    if (expandedId === id) {
+      // Closing: keep panel mounted for exit animation, then unmount
+      setClosingId(id)
+      setExpandedId(null)
+      setTimeout(() => setClosingId(prev => (prev === id ? null : prev)), 250)
+    } else {
+      // Opening: cancel any in-progress close, open new panel
+      setClosingId(null)
+      setExpandedId(id)
+    }
   }
 
   function formatDate(iso) {
@@ -101,7 +111,13 @@ export default function SessionHistory() {
                   </button>
                 </div>
 
-                {isExpanded && <SessionReplay sessionId={s.id} />}
+                {(isExpanded || closingId === s.id) && (
+                  <div className={`accordion-body ${
+                    closingId === s.id ? 'accordion-body--closing' : 'accordion-body--open'
+                  }`}>
+                    <SessionReplay sessionId={s.id} />
+                  </div>
+                )}
               </div>
             )
           })}
