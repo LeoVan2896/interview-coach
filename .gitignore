@@ -16,6 +16,7 @@ frontend/.env.production
 # ===== Environment / Secrets =====
 .env
 .env.*
+!.env.production
 
 # ===== IDE =====
 .idea/
