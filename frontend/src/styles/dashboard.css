@@ -1,0 +1,153 @@
+/* ═══════════════════════════════════════════════
+   Dashboard layout + component styles.
+   Tokens come from global.css.
+   ═══════════════════════════════════════════════ */
+
+/* ── Shell layout ─────────────────────────────── */
+.shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.shell-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── Topbar ───────────────────────────────────── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  gap: 12px;
+}
+
+.topbar-info { display: flex; flex-direction: column; gap: 2px; }
+.topbar-date  { font-size: 11px; color: var(--muted); }
+.topbar-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.topbar-sub   { font-size: 11px; color: var(--muted); }
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Sidebar ──────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-top {
+  padding: 16px 14px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.sidebar-brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-brand-name  { font-size: 13px; font-weight: 700; color: var(--text); }
+.sidebar-brand-sub   { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+.sidebar-progress-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.sidebar-progress-value { color: var(--accent); font-weight: 700; }
+
+.sidebar-progress-track {
+  height: 4px;
+  background: rgba(255,255,255,.08);
+  border-radius: 99px;
+}
+
+.sidebar-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+  border-radius: 99px;
+}
+
+.sidebar-nav { flex: 1; padding: 8px; overflow-y: auto; }
+
+.sidebar-nav-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .9px;
+  color: var(--muted);
+  padding: 10px 8px 4px;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 400;
+  background: transparent;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  transition: color 0.12s, background 0.12s, border-color 0.12s;
+  text-decoration: none;
+  width: 100%;
+  text-align: left;
+}
+
+.sidebar-nav-item:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.sidebar-nav-item.active {
+  color: var(--accent);
+  font-weight: 600;
+  background: rgba(96,165,250,.15);
+  border-color: rgba(96,165,250,.25);
+}
+
+.sidebar-nav-icon { font-size: 14px; }
+
+.sidebar-footer {
+  padding: 8px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
