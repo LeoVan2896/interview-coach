@@ -3,16 +3,23 @@ import { api } from '../api/client'
 import MessageBubble from './MessageBubble'
 
 export default function SessionReplay({ sessionId }) {
-  const [messages, setMessages] = useState([])
-  const [status, setStatus]     = useState('loading') // 'loading' | 'error' | 'empty' | 'loaded'
-  const bottomRef               = useRef(null)
+  const [messages, setMessages]   = useState([])
+  const [status, setStatus]       = useState('loading') // 'loading' | 'error' | 'empty' | 'loaded'
+  // retryCount bumped by the Retry button so the effect below re-runs without duplicating fetch logic
+  const [retryCount, setRetryCount] = useState(0)
+  const bottomRef                 = useRef(null)
 
   useEffect(() => {
     if (!sessionId) return
+    // Cancellation flag: if the component unmounts or sessionId changes while the
+    // fetch is in-flight, the .then callback sees cancelled=true and bails out,
+    // preventing setState on a stale/unmounted component instance.
+    let cancelled = false
     setStatus('loading')
     setMessages([])
 
     api.getSession(sessionId).then(({ data, error }) => {
+      if (cancelled) return
       if (error || !data) {
         setStatus('error')
         return
@@ -24,7 +31,8 @@ export default function SessionReplay({ sessionId }) {
       setMessages(data.messages)
       setStatus('loaded')
     })
-  }, [sessionId])
+    return () => { cancelled = true }
+  }, [sessionId, retryCount])
 
   // Auto-scroll to bottom once messages are loaded
   useEffect(() => {
@@ -50,15 +58,7 @@ export default function SessionReplay({ sessionId }) {
           <p>Failed to load session.</p>
           <button
             className="btn btn-secondary"
-            onClick={() => {
-              setStatus('loading')
-              api.getSession(sessionId).then(({ data, error }) => {
-                if (error || !data) { setStatus('error'); return }
-                if (!data.messages || data.messages.length === 0) { setStatus('empty'); return }
-                setMessages(data.messages)
-                setStatus('loaded')
-              })
-            }}
+            onClick={() => setRetryCount(c => c + 1)}
           >
             Retry
           </button>
@@ -79,8 +79,9 @@ export default function SessionReplay({ sessionId }) {
 
   return (
     <div className="replay-container">
-      {messages.map(msg => (
-        <MessageBubble key={msg.id} message={msg} />
+      {messages.map((msg, i) => (
+        // msg.id ?? i: prefer stable server ID; fall back to index only when id is absent
+        <MessageBubble key={msg.id ?? i} message={msg} />
       ))}
       <div ref={bottomRef} />
     </div>
