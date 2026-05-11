@@ -10,58 +10,38 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const { data, loading, error } = useDashboard()
 
-  const plan        = data?.plan
-  const tasks       = data?.todayTasks
-  const weekDays    = data?.weekDays ?? []
-  const dsaProgress = data?.dsaProgress ?? []
-  const stats       = data?.stats
-  const globeStage  = data?.globeStage ?? 1
+  const plan         = data?.plan
+  const tasks        = data?.todayTasks
+  const weekDays     = data?.weekDays ?? []
+  const dsaProgress  = data?.dsaProgress ?? []
+  const stats        = data?.stats
+  const globeStage   = data?.globeStage ?? 1
   const problemsDone = data?.problemsDone ?? 0
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+    <div className="dashboard-page">
       <Topbar
         title="Today's Plan"
         right={plan && (
-          <div style={{
-            fontSize: 12,
-            fontWeight: 700,
-            padding: '5px 12px',
-            background: '#eff6ff',
-            border: '1px solid #bfdbfe',
-            borderRadius: 8,
-            color: 'var(--color-blue)',
-          }}>
+          <div className="topbar-week-badge">
             Week {plan.currentWeek} of 8 · {plan.daysLeft} days left
           </div>
         )}
       />
 
       {error && (
-        <div style={{
-          margin: '12px 16px 0',
-          padding: '10px 14px',
-          background: '#fee2e2',
-          color: '#b91c1c',
-          borderRadius: 8,
-          fontSize: 13,
-          flexShrink: 0,
-        }}>
-          ⚠ {error}
-        </div>
+        <div className="dashboard-error">⚠ {error}</div>
       )}
 
       {loading && (
-        <div style={{ padding: 16, fontSize: 13, color: 'var(--color-text-faint)' }}>
-          Loading…
-        </div>
+        <div className="dashboard-loading">Loading…</div>
       )}
 
       {!loading && !error && (
-        <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="dashboard-body">
 
           {/* Row 1: 3 Pillar Cards */}
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div className="dashboard-pillar-row">
             <PillarCard
               color="#3b82f6"
               icon="📖"
@@ -98,27 +78,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Row 2: Week Strip + DSA Progress | Stats + Globe */}
-          <div style={{ display: 'flex', gap: 12, flex: 1, minHeight: 0 }}>
-
-            <div style={{
-              border: '1px solid var(--color-border)',
-              borderRadius: 10,
-              background: 'var(--color-surface)',
-              padding: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 14,
-              flex: 1.6,
-              minWidth: 0,
-              overflow: 'hidden',
-            }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                This Week
-              </div>
+          <div className="dashboard-lower-row">
+            <div className="dashboard-week-panel">
+              <div className="dashboard-panel-label">This Week</div>
               {weekDays.length > 0 && <WeekStrip weekDays={weekDays} />}
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                DSA Progress
-              </div>
+              <div className="dashboard-panel-label">DSA Progress</div>
               <DsaProgressList dsaProgress={dsaProgress} />
             </div>
 
