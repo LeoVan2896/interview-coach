@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import SessionReplay from './SessionReplay'
@@ -9,6 +9,13 @@ export default function SessionHistory() {
   const [loading, setLoading]       = useState(true)
   const [expandedId, setExpandedId] = useState(null)
   const [closingId, setClosingId]   = useState(null)
+  const timeoutRef                  = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     api.getSessions().then(({ data }) => {
@@ -33,7 +40,7 @@ export default function SessionHistory() {
       // Closing: keep panel mounted for exit animation, then unmount
       setClosingId(id)
       setExpandedId(null)
-      setTimeout(() => setClosingId(prev => (prev === id ? null : prev)), 250)
+      timeoutRef.current = setTimeout(() => setClosingId(prev => (prev === id ? null : prev)), 250)
     } else {
       // Opening: cancel any in-progress close, open new panel
       setClosingId(null)
