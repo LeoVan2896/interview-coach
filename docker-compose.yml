@@ -1,22 +1,84 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   postgres:
-    image: postgres:15
-    container_name: interview-coach-db
+    image: postgres:15-alpine
+    container_name: interview-coach-postgres
     environment:
-      POSTGRES_DB: interviewcoach
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: ${DB_NAME:-interviewdb}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev -d interviewcoach"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - interview-coach-net
+
+  # pgAdmin (PostgreSQL Management UI)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: interview-coach-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - interview-coach-net
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: interview-coach-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-interviewdb}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-postgres}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_PROFILES_ACTIVE: prod
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - interview-coach-net
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: interview-coach-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - interview-coach-net
 
 volumes:
-  pgdata:
+  postgres_data:
+    driver: local
+
+networks:
+  interview-coach-net:
+    driver: bridge
