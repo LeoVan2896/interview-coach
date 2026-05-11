@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
+import SessionReplay from './SessionReplay'
 
 export default function SessionHistory() {
-  const navigate = useNavigate()
-  const [sessions, setSessions] = useState([])
-  const [loading, setLoading] = useState(true)
+  const navigate                    = useNavigate()
+  const [sessions, setSessions]     = useState([])
+  const [loading, setLoading]       = useState(true)
+  const [expandedId, setExpandedId] = useState(null)
 
   useEffect(() => {
     api.getSessions().then(({ data }) => {
@@ -18,7 +20,15 @@ export default function SessionHistory() {
     e.stopPropagation()
     if (!window.confirm('Delete this session? This cannot be undone.')) return
     const { error } = await api.deleteSession(id)
-    if (!error) setSessions(prev => prev.filter(s => s.id !== id))
+    if (!error) {
+      setSessions(prev => prev.filter(s => s.id !== id))
+      // Collapse if the deleted session was expanded
+      if (expandedId === id) setExpandedId(null)
+    }
+  }
+
+  function toggleExpand(id) {
+    setExpandedId(prev => (prev === id ? null : id))
   }
 
   function formatDate(iso) {
@@ -46,40 +56,50 @@ export default function SessionHistory() {
         <div className="empty-state">
           <p className="empty-icon">📭</p>
           <p>No sessions yet.</p>
-          <button className="btn btn-primary" onClick={() => navigate('/')}>
+          <button className="btn btn-primary" onClick={() => navigate('/practice')}>
             Start Your First Interview
           </button>
         </div>
       ) : (
         <div className="session-list">
-          {sessions.map(s => (
-            <div
-              key={s.id}
-              className="session-card"
-              onClick={() => navigate(`/interview/${s.id}`)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={e => e.key === 'Enter' && navigate(`/interview/${s.id}`)}
-            >
-              <div className="session-card-left">
-                <div className="session-meta-row">
-                  <span className="session-topic-badge">{s.topicLabel}</span>
-                  {s.completed && <span className="badge badge-success">✓ Done</span>}
+          {sessions.map(s => {
+            const isExpanded = expandedId === s.id
+            return (
+              <div key={s.id} className="session-card-wrapper">
+                <div
+                  className={`session-card ${isExpanded ? 'session-card--expanded' : ''}`}
+                  onClick={() => toggleExpand(s.id)}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
+                  onKeyDown={e => e.key === 'Enter' && toggleExpand(s.id)}
+                >
+                  <span className="session-chevron" aria-hidden="true">
+                    {isExpanded ? '▼' : '▶'}
+                  </span>
+                  <div className="session-card-left">
+                    <div className="session-meta-row">
+                      <span className="session-topic-badge">{s.topicLabel}</span>
+                      {s.completed && <span className="badge badge-success">✓ Done</span>}
+                    </div>
+                    <p className="session-question">{s.questionText}</p>
+                    <span className="session-meta">
+                      {formatDate(s.createdAt)} · {s.messageCount} messages
+                    </span>
+                  </div>
+                  <button
+                    className="btn-delete"
+                    onClick={e => handleDelete(s.id, e)}
+                    title="Delete session"
+                  >
+                    🗑
+                  </button>
                 </div>
-                <p className="session-question">{s.questionText}</p>
-                <span className="session-meta">
-                  {formatDate(s.createdAt)} · {s.messageCount} messages
-                </span>
+
+                {isExpanded && <SessionReplay sessionId={s.id} />}
               </div>
-              <button
-                className="btn-delete"
-                onClick={e => handleDelete(s.id, e)}
-                title="Delete session"
-              >
-                🗑
-              </button>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

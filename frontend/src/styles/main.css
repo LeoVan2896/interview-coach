@@ -687,3 +687,32 @@ pre, code { font-family: var(--font-mono); }
   color: var(--text-muted, #64748b);
   font-size: 0.9rem;
 }
+
+/* ── Session Accordion ──────────────────────────────────── */
+.session-card-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  border: 1px solid var(--border, #1e293b);
+}
+
+.session-card-wrapper .session-card {
+  margin-bottom: 0;
+  border-radius: 0;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-card--expanded {
+  background: var(--surface-hover, #1e293b) !important;
+}
+
+.session-chevron {
+  font-size: 0.65rem;
+  color: var(--text-muted, #64748b);
+  flex-shrink: 0;
+  width: 14px;
+}
