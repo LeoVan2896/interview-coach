@@ -9,7 +9,7 @@ RUN cd backend && mvn dependency:resolve
 
 # Copy entire backend source and build
 COPY backend/ ./backend/
-RUN cd backend && mvn clean package -DskipTests
+RUN cd backend && mvn package -DskipTests
 
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre
@@ -25,3 +25,6 @@ EXPOSE 8080
 # Set production Spring profile and run
 ENV SPRING_PROFILES_ACTIVE=prod
 CMD ["java", "-jar", "app.jar"]
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
