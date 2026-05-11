@@ -44,7 +44,7 @@ export default function InterviewChat() {
     return (
       <div className="error-screen">
         <p className="error-text">⚠️ {error}</p>
-        <Link to="/" className="btn btn-primary">Back to Topics</Link>
+        <Link to="/practice" className="btn btn-primary">Back to Topics</Link>
       </div>
     )
   }
@@ -53,7 +53,7 @@ export default function InterviewChat() {
     <div className="chat-page">
       {/* ── Top bar ── */}
       <div className="chat-header">
-        <button className="btn-back" onClick={() => navigate('/')} title="Back to topics">←</button>
+        <button className="btn-back" onClick={() => navigate('/practice')} title="Back to topics">←</button>
         <div className="chat-header-info">
           <span className="chat-topic-badge">{session?.topicLabel}</span>
           <p className="chat-question" title={session?.questionText}>
@@ -90,7 +90,10 @@ export default function InterviewChat() {
           <MessageBubble key={msg.id ?? i} message={msg} />
         ))}
 
-        {busy && (
+        {/* Show thinking dots only during the gap before the first token arrives.
+            Once the streaming bubble has content the cursor handles the "typing" cue. */}
+        {busy && messages.every(m => !m.streaming || m.content === '') &&
+          messages.some(m => m.streaming) && (
           <div className="thinking-indicator" aria-label="AI is thinking">
             <span className="dot" />
             <span className="dot" />

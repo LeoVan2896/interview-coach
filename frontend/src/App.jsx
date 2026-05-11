@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import Shell from './components/layout/Shell'
 import DashboardPage from './pages/DashboardPage'
 import LessonsPage from './pages/LessonsPage'
@@ -6,30 +6,15 @@ import LessonDetailPage from './pages/LessonDetailPage'
 import SchedulePage from './pages/SchedulePage'
 import DsaRoadmapPage from './pages/DsaRoadmapPage'
 import DsaConceptPage from './pages/DsaConceptPage'
+import TopicSelector from './components/TopicSelector'
+import QuestionList from './components/QuestionList'
+import InterviewChat from './components/InterviewChat'
+import SessionHistory from './components/SessionHistory'
 
-function PracticePage() {
-  const location = useLocation()
-  const state = location.state
+function ScrollPage({ children }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--color-border)', background: '#fff' }}>
-        <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-text)' }}>🎯 Interview Practice</div>
-        {state?.lessonTitle && (
-          <div style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: 4 }}>
-            Topic: <strong>{state.lessonTitle}</strong>
-          </div>
-        )}
-      </div>
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, color: '#94a3b8' }}>
-        <div style={{ fontSize: 40 }}>🚧</div>
-        <div style={{ fontSize: 18, fontWeight: 700, color: '#475569' }}>Interview Practice</div>
-        <div style={{ fontSize: 13 }}>Full mock interview coming in the next phase</div>
-        {state?.lessonTitle && (
-          <div style={{ fontSize: 12, color: '#60a5fa', fontWeight: 600, background: '#eff6ff', padding: '6px 14px', borderRadius: 8, border: '1px solid #bfdbfe' }}>
-            Ready to practice: {state.lessonTitle}
-          </div>
-        )}
-      </div>
+    <div style={{ flex: 1, overflowY: 'auto', background: '#080c12' }}>
+      <div className="app-main">{children}</div>
     </div>
   )
 }
@@ -48,15 +33,17 @@ export default function App() {
   return (
     <Shell>
       <Routes>
-        <Route path="/"          element={<DashboardPage />} />
-        <Route path="/roadmap"   element={<DsaRoadmapPage />} />
-        <Route path="/roadmap/concept/:topicId" element={<DsaConceptPage />} />
-        <Route path="/schedule"  element={<SchedulePage />} />
-        <Route path="/lessons"   element={<LessonsPage />} />
-        <Route path="/lessons/:id" element={<LessonDetailPage />} />
-        <Route path="/practice"  element={<PracticePage />} />
-        <Route path="/sessions"  element={<ComingSoon name="History" />} />
-        <Route path="/settings"  element={<ComingSoon name="Settings" />} />
+        <Route path="/"                              element={<DashboardPage />} />
+        <Route path="/roadmap"                       element={<DsaRoadmapPage />} />
+        <Route path="/roadmap/concept/:topicId"      element={<DsaConceptPage />} />
+        <Route path="/schedule"                      element={<SchedulePage />} />
+        <Route path="/lessons"                       element={<LessonsPage />} />
+        <Route path="/lessons/:id"                   element={<LessonDetailPage />} />
+        <Route path="/practice"                      element={<ScrollPage><TopicSelector /></ScrollPage>} />
+        <Route path="/practice/questions/:topic"     element={<ScrollPage><QuestionList /></ScrollPage>} />
+        <Route path="/practice/interview/:sessionId" element={<InterviewChat />} />
+        <Route path="/sessions"                      element={<ScrollPage><SessionHistory /></ScrollPage>} />
+        <Route path="/settings"                      element={<ComingSoon name="Settings" />} />
       </Routes>
     </Shell>
   )

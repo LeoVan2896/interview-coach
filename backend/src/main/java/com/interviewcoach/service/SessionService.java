@@ -114,6 +114,53 @@ public class SessionService {
         return MessageDto.from(scorecardMessage);
     }
 
+    /**
+     * Carries the session + its full history across the transaction boundary into
+     * the async streaming thread.  All fields are simple value types (enum, String,
+     * List of detached entities whose basic columns are already fetched) — safe to
+     * read after the originating transaction closes.
+     */
+    public record StreamContext(Session session, List<Message> history) {}
+
+    /**
+     * Phase 1 of the streaming flow (runs in its own short transaction):
+     *  - validates the session exists
+     *  - saves the user's message
+     *  - loads the full history that Claude needs for context
+     *  - returns it all as a StreamContext the controller hands to the async thread
+     *
+     * Keeping this separate from the streaming itself means the DB connection is
+     * released before the long-running HTTP call to Anthropic begins.
+     */
+    @Transactional
+    public StreamContext prepareStream(UUID sessionId, String userContent) {
+        Session session = findSessionById(sessionId);
+        List<Message> history = messageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+
+        Message userMessage = new Message();
+        userMessage.setSession(session);
+        userMessage.setRole(Message.Role.USER);
+        userMessage.setContent(userContent);
+        messageRepository.save(userMessage);
+
+        return new StreamContext(session, history);
+    }
+
+    /**
+     * Phase 2 of the streaming flow (runs in its own short transaction):
+     * persists the fully-assembled AI reply after streaming completes.
+     */
+    @Transactional
+    public MessageDto saveAssistantMessage(UUID sessionId, String content) {
+        Session session = findSessionById(sessionId);
+        Message msg = new Message();
+        msg.setSession(session);
+        msg.setRole(Message.Role.ASSISTANT);
+        msg.setContent(content);
+        msg = messageRepository.save(msg);
+        return MessageDto.from(msg);
+    }
+
     public void deleteSession(UUID id) {
         if (!sessionRepository.existsById(id)) {
             throw new EntityNotFoundException("Session not found: " + id);

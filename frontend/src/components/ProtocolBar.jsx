@@ -1,10 +1,10 @@
 const PHASES = {
   coding: [
-    { id: 1, label: '① Clarify' },
-    { id: 2, label: '② Approach' },
-    { id: 3, label: '③ Solve' },
-    { id: 4, label: '④ Trace' },
-    { id: 5, label: '⑤ Score' },
+    { id: 1, label: '① Understand' },
+    { id: 2, label: '② Design' },
+    { id: 3, label: '③ Implement' },
+    { id: 4, label: '④ Test' },
+    { id: 5, label: '⑤ Optimize' },
   ],
   behavioral: [
     { id: 1, label: '① Situation' },
@@ -39,9 +39,15 @@ function detectPhase(messages, questionType) {
 
   switch (questionType) {
     case 'coding':
-      if (last.includes('trace through') || last.includes('example input')) return 4
-      if (last.includes('walk me through your approach') || last.includes('naive solution')) return 3
-      if (last.includes('good') && last.includes('clarif')) return 2
+      // Step 5 — Optimize: AI suggests improvements or asks for better solution
+      if (last.includes('optimiz') || last.includes('better solution') || last.includes('improve') || last.includes('can you do better')) return 5
+      // Step 4 — Test: AI asks for manual trace / walkthrough
+      if (last.includes('trace through') || last.includes('walk me through') || last.includes('walk through it') || last.includes('concrete example') || last.includes('edge case')) return 4
+      // Step 3 — Implement: AI asks for code / implementation
+      if (last.includes('implement') || last.includes('write the code') || last.includes('write a') || last.includes('code it') || last.includes('let\'s code')) return 3
+      // Step 2 — Design: AI asks for approach / algorithm
+      if (last.includes('design') || last.includes('approach') || last.includes('algorithm') || last.includes('data structure') || last.includes('solution design')) return 2
+      // Step 1 — Understand (default)
       return 1
 
     case 'behavioral':

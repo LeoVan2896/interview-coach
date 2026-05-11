@@ -24,30 +24,52 @@ export function useInterview(sessionId) {
     setBusy(false)
   }
 
-  const sendMessage = useCallback(async (text) => {
+  const sendMessage = useCallback((text) => {
     if (!sessionId || busy) return
     setError(null)
     setBusy(true)
 
-    // Optimistic update: show the user's message immediately while waiting for AI
-    const tempId = `temp-${Date.now()}`
-    const userMsg = { id: tempId, role: 'USER', content: text }
-    setMessages(prev => [...prev, userMsg])
+    // IDs for the optimistic user bubble and the streaming AI bubble.
+    // They live in state with temp IDs until the server confirms each.
+    const tempUserId = `temp-user-${Date.now()}`
+    const tempAiId   = `temp-ai-${Date.now()}`
 
-    const { data, error } = await api.sendMessage(sessionId, text)
+    // Immediately paint both bubbles: user message is final content;
+    // AI bubble starts empty and fills token-by-token via onChunk.
+    setMessages(prev => [
+      ...prev,
+      { id: tempUserId, role: 'USER',      content: text, streaming: false },
+      { id: tempAiId,   role: 'ASSISTANT', content: '',   streaming: true  },
+    ])
 
-    if (error) {
-      setError(error)
-      setMessages(prev => prev.filter(m => m.id !== tempId))
-    } else {
-      // Swap temp message for confirmed, then append AI reply
-      setMessages(prev => [
-        ...prev.filter(m => m.id !== tempId),
-        { ...userMsg, id: Date.now() },
-        data
-      ])
-    }
-    setBusy(false)
+    api.streamMessage(
+      sessionId,
+      text,
+
+      // onChunk — called once per token; append to the streaming bubble
+      (chunk) => {
+        setMessages(prev => prev.map(m =>
+          m.id === tempAiId ? { ...m, content: m.content + chunk } : m
+        ))
+      },
+
+      // onDone — stream complete; replace temp ID with the real persisted UUID
+      (finalId) => {
+        setMessages(prev => prev.map(m =>
+          m.id === tempAiId ? { ...m, id: finalId, streaming: false } : m
+        ))
+        setBusy(false)
+      },
+
+      // onError — remove both optimistic bubbles and surface the error
+      (err) => {
+        setError(err)
+        setMessages(prev =>
+          prev.filter(m => m.id !== tempAiId && m.id !== tempUserId)
+        )
+        setBusy(false)
+      }
+    )
   }, [sessionId, busy])
 
   const requestScorecard = useCallback(async () => {

@@ -1,13 +1,22 @@
 package com.interviewcoach.service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interviewcoach.model.Message;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Service
 public class AnthropicService {
@@ -15,11 +24,18 @@ public class AnthropicService {
     private static final String MODEL = "claude-sonnet-4-6";
     private static final int MAX_TOKENS = 4096;
 
+    // Thread-safe for reading; reused across all streaming calls.
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     private final RestClient restClient;
+    // Kept as a field so streamChat() can set the Authorization header independently
+    // of the RestClient instance (which is used only for non-streaming calls).
+    private final String apiKey;
 
     // Constructor injection: @Value reads from application.properties at startup.
     // If the key is missing, the app fails to start — fail-fast is intentional.
     public AnthropicService(@Value("${anthropic.api-key}") String apiKey) {
+        this.apiKey = apiKey;
         this.restClient = RestClient.builder()
                 .baseUrl("https://api.anthropic.com/v1")
                 .defaultHeader("Content-Type", "application/json")
@@ -49,6 +65,70 @@ public class AnthropicService {
     public String chat(String topicLabel, String questionText, String questionType, List<Message> history, String userMessage) {
         List<ApiMessage> messages = buildApiMessages(history, userMessage);
         return callClaude(buildInterviewerSystemPrompt(topicLabel, questionText, questionType), messages);
+    }
+
+    /**
+     * Streams the AI interviewer reply token-by-token.
+     * Uses Java's built-in HttpClient with BodyHandlers.ofLines() — no extra dependencies.
+     *
+     * Why not the RestClient used elsewhere?
+     * RestClient buffers the full response body before returning, which defeats streaming.
+     * Java's HttpClient with ofLines() gives us a lazy Stream<String> that yields one line
+     * at a time as Anthropic sends them over the wire.
+     *
+     * SSE format from Anthropic:
+     *   data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hello"}}
+     * We extract only text_delta events and forward each chunk to the onChunk consumer.
+     *
+     * @param onChunk called once per token chunk as it arrives; must not block
+     */
+    public void streamChat(String topicLabel, String questionText, String questionType,
+                           List<Message> history, String userMessage, Consumer<String> onChunk) {
+
+        List<ApiMessage> messages = buildApiMessages(history, userMessage);
+        String systemPrompt = buildInterviewerSystemPrompt(topicLabel, questionText, questionType);
+
+        String jsonBody;
+        try {
+            jsonBody = MAPPER.writeValueAsString(
+                    new StreamApiRequest(MODEL, MAX_TOKENS, systemPrompt, messages, true));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize streaming request", e);
+        }
+
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.anthropic.com/v1/messages"))
+                .header("Content-Type", "application/json")
+                .header("x-api-key", apiKey)
+                .header("anthropic-version", "2023-06-01")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        try {
+            HttpResponse<java.util.stream.Stream<String>> response =
+                    httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofLines());
+
+            response.body().forEach(line -> {
+                if (!line.startsWith("data: ")) return;
+                String data = line.substring(6).trim();
+                if (data.isEmpty() || data.equals("[DONE]")) return;
+
+                try {
+                    JsonNode node = MAPPER.readTree(data);
+                    if ("content_block_delta".equals(node.path("type").asText())) {
+                        String text = node.path("delta").path("text").asText("");
+                        if (!text.isEmpty()) onChunk.accept(text);
+                    }
+                } catch (JsonProcessingException e) {
+                    // Malformed SSE event — skip and continue
+                }
+            });
+
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Streaming request to Anthropic failed", e);
+        }
     }
 
     public String generateScorecard(String topicLabel, String questionText, String questionType, List<Message> history) {
@@ -108,38 +188,36 @@ public class AnthropicService {
     private static final String CODING_PROTOCOL = """
             INTERVIEW PROTOCOL — CODING QUESTION (follow steps IN ORDER)
 
-            ▶ STEP 1 — UNDERSTAND THE PROBLEM
-            - Do NOT let the candidate jump to coding immediately. Stop them if they try.
+            ▶ STEP 1 — UNDERSTAND THE PROBLEM (required)
+            - Do NOT let the candidate jump to coding. Stop them if they try.
               Say: "Before anything — do you fully understand the problem? What clarifying questions would you ask me?"
-            - Probe for: input/output types, constraints, edge cases, scale, allowed data structures, expected behavior on invalid input.
+            - Probe for: input/output types, constraints, edge cases, scale, allowed data structures.
             - Answer their questions as the interviewer. Only advance when understanding is solid.
 
-            ▶ STEP 2 — DESIGN THE SOLUTION
+            ▶ STEP 2 — DESIGN THE SOLUTION (required)
             - Prompt: "Good. Now walk me through your solution design before writing any code."
             - Expect: data structures chosen, algorithm selected, high-level steps, time/space complexity estimate.
             - If they jump straight to brute force: "What's the most optimal approach you can think of?"
             - If no trade-off discussion: "What are the trade-offs of that design?"
 
-            ▶ STEP 3 — IMPLEMENT
+            ▶ STEP 3 — IMPLEMENT (required)
             - Let them write the code or explain it in detail line by line.
             - If they go quiet: "Keep talking — what are you thinking right now?"
             - If stuck: give a Socratic hint — never give the answer directly.
-            - When done: move to Step 4.
 
-            ▶ STEP 4 — TEST (manually walk through)
-            - Prompt: "Now test your solution. Walk me through it with a concrete example — step by step."
+            ▶ STEP 4 — TEST / WALK THROUGH MANUALLY (optional — offer after implementation)
+            - Prompt: "Let's verify your solution. Walk me through it with a concrete example — step by step."
             - They must trace input → through the logic → to the output manually, no running code.
             - Push for edge cases: "What happens with an empty input? A single element? Negative numbers?"
             - If they say 'it works' without tracing: "Show me — walk through it by hand."
+            - This step is optional: if the candidate's implementation is already clear and correct, you may skip directly to Step 5.
 
-            ▶ STEP 5 — OPTIMIZE THE SOLUTION (optional — only if candidate asks or time permits)
-            - Prompt: "Can you do better? Is there a way to reduce time or space complexity?"
-            - Expect: identify the bottleneck → propose improvement → state new complexity.
-            - If they can't see the optimization: "What's the slowest part of your current solution?"
-            - If already optimal: "How would this scale to 10 million records? What breaks first?"
-            - Do NOT push this step unless the candidate brings it up or explicitly asks for it.
+            ▶ STEP 5 — OPTIMIZE / IMPROVE (optional — offer after Step 3 or 4)
+            - Prompt: "Can you do better? Is there a more optimal solution in terms of time or space complexity?"
+            - If already optimal: "Good. Let's talk about trade-offs — when would you choose this approach over alternatives?"
+            - This step is optional: only push for optimization if the candidate hasn't already reached the best solution.
 
-            ▶ SCORECARD (only when explicitly requested or after Step 5)
+            ▶ SCORECARD (only when explicitly requested via the Scorecard button)
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             📊 INTERVIEW SCORECARD
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -148,9 +226,8 @@ public class AnthropicService {
             Implementation        [X/10] — note
             Testing & Edge Cases  [X/10] — note
             Optimization Thinking [X/10] — note
-            Communication         [X/10] — note
             ──────────────────────────────────────────
-            TOTAL                 [X/60]
+            TOTAL                 [X/50]
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             ✅ WHAT YOU DID WELL
             ⚠️ WHAT WAS MISSING
@@ -288,13 +365,14 @@ public class AnthropicService {
 
     private String buildResearchSystemPrompt(String topicLabel) {
         return """
-                You are a technical interview question researcher. Find the most commonly asked %s interview questions for software engineers with 1-3 years experience in 2024-2025.
+                You are a technical interview question researcher. Find the most commonly asked %s CODING interview questions for software engineers with 1-3 years experience in 2024-2025.
 
                 Return ONLY valid JSON, no markdown, no explanation:
                 {"questions":[{"id":"1","question":"...","difficulty":"medium","type":"coding","hint":"Key concept being tested: ...","source":"Commonly asked at..."}]}
 
-                Rules: exactly 6 questions. difficulty: easy|medium|hard. type: conceptual|coding|design|behavioral.
-                Mix: 2 easy/medium, 3 medium, 1 hard. Make questions specific and real.
+                Rules: exactly 6 questions. difficulty: easy|medium|hard. type must always be "coding".
+                All questions must require the candidate to write, trace, or explain code to answer — not just define a concept.
+                Mix: 2 easy, 3 medium, 1 hard. Make questions specific and real — include sample input/output or a concrete scenario.
                 """.formatted(topicLabel);
     }
 
@@ -305,6 +383,16 @@ public class AnthropicService {
             @JsonProperty("max_tokens") int maxTokens,
             String system,
             List<ApiMessage> messages
+    ) {}
+
+    // Identical to ApiRequest but includes stream:true so Anthropic sends SSE chunks
+    // instead of waiting for the full response before returning.
+    record StreamApiRequest(
+            String model,
+            @JsonProperty("max_tokens") int maxTokens,
+            String system,
+            List<ApiMessage> messages,
+            boolean stream
     ) {}
 
     record ApiMessage(String role, String content) {}

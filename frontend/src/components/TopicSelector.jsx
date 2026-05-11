@@ -56,7 +56,7 @@ export default function TopicSelector() {
           <button
             key={topic.id}
             className="topic-card"
-            onClick={() => navigate(`/questions/${topic.id}`)}
+            onClick={() => navigate(`/practice/questions/${topic.id}`)}
           >
             <span className="topic-icon">{topic.icon}</span>
             <h3 className="topic-name">{topic.label}</h3>
