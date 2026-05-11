@@ -692,7 +692,6 @@ pre, code { font-family: var(--font-mono); }
 .session-card-wrapper {
   border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 8px;
   border: 1px solid var(--border, #1e293b);
 }
 
@@ -706,8 +705,8 @@ pre, code { font-family: var(--font-mono); }
   gap: 10px;
 }
 
-.session-card--expanded {
-  background: var(--surface-hover, #1e293b) !important;
+.session-card-wrapper .session-card.session-card--expanded {
+  background: var(--surface-hover, #1e293b);
 }
 
 .session-chevron {

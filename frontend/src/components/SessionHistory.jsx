@@ -72,7 +72,12 @@ export default function SessionHistory() {
                   role="button"
                   tabIndex={0}
                   aria-expanded={isExpanded}
-                  onKeyDown={e => e.key === 'Enter' && toggleExpand(s.id)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      toggleExpand(s.id)
+                    }
+                  }}
                 >
                   <span className="session-chevron" aria-hidden="true">
                     {isExpanded ? '▼' : '▶'}
