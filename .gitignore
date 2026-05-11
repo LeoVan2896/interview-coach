@@ -1,6 +1,7 @@
 # ===== Backend (Maven / Spring Boot) =====
 backend/target/
 backend/.env
+!backend/.env.example
 *.class
 *.jar
 *.war

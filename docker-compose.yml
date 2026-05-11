@@ -1,5 +1,13 @@
 version: '3.8'
 
+# Default logging configuration with rotation to prevent disk fill
+x-logging:
+  &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   # PostgreSQL Database
   postgres:
@@ -20,6 +28,17 @@ services:
       retries: 5
     networks:
       - interview-coach-net
+    logging:
+      <<: *default-logging
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 256M
+        reservations:
+          cpus: '0.5'
+          memory: 128M
 
   # pgAdmin (PostgreSQL Management UI)
   pgadmin:
@@ -27,7 +46,7 @@ services:
     container_name: interview-coach-pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - "5050:80"
     depends_on:
@@ -35,6 +54,17 @@ services:
         condition: service_healthy
     networks:
       - interview-coach-net
+    logging:
+      <<: *default-logging
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
 
   # Spring Boot Backend
   backend:
@@ -61,6 +91,17 @@ services:
       retries: 3
     networks:
       - interview-coach-net
+    logging:
+      <<: *default-logging
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
 
   # React Frontend
   frontend:
@@ -71,9 +112,26 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
     networks:
       - interview-coach-net
+    logging:
+      <<: *default-logging
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
 
 volumes:
   postgres_data:
