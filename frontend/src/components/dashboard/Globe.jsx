@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 
 const STAGE_LABELS = [
   '', 'Dark Ages', 'Stone Age', 'Ancient Civilization', 'Medieval',
@@ -211,30 +210,26 @@ function StageScene({ stage }) {
 }
 
 export default function Globe({ stage }) {
-  const [preview, setPreview] = useState(stage)
-
-  useEffect(() => { setPreview(stage) }, [stage])
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>
-        Stage {preview} — {STAGE_LABELS[preview]}
+    <div className="globe-wrapper">
+      <div className="globe-stage-label">
+        Stage {stage} — {STAGE_LABELS[stage]}
       </div>
 
-      <div style={{ width: '100%', maxWidth: 200, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-        <StageScene stage={preview} />
+      <div className="globe-scene">
+        <StageScene stage={stage} />
       </div>
 
       <input
         type="range"
         min={1}
         max={9}
-        value={preview}
-        onChange={e => setPreview(Number(e.target.value))}
-        style={{ width: '100%', maxWidth: 200, cursor: 'pointer' }}
+        value={stage}
+        readOnly
+        style={{ width: '100%', cursor: 'default', pointerEvents: 'none' }}
       />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: 200, fontSize: 10, color: 'var(--color-text-faint)' }}>
+      <div className="globe-era-row">
         <span>Dark Ages</span>
         <span>Connected World</span>
       </div>

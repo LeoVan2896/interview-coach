@@ -151,3 +151,160 @@
   padding: 8px;
   border-top: 1px solid rgba(255,255,255,.06);
 }
+
+/* ── PillarCard ───────────────────────────────── */
+.pillar-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.pillar-card-bar { height: 4px; }
+
+.pillar-card-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.pillar-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pillar-card-icon { font-size: 16px; }
+
+.pillar-card-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pillar-card-badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+}
+
+.pillar-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.pillar-card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.pillar-card-btn {
+  margin-top: auto;
+  padding: 7px 14px;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.pillar-card-btn:hover { opacity: 0.85; }
+
+/* ── StatsCard ────────────────────────────────── */
+.stats-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.stats-card-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stats-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 8px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  flex: 1;
+}
+
+.stat-box-value {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.stat-box-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 2px;
+}
+
+/* ── Globe ────────────────────────────────────── */
+.globe-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.globe-stage-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.globe-scene {
+  width: 85%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.globe-era-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 10px;
+  color: var(--muted);
+}
