@@ -74,24 +74,28 @@ function detectPhase(messages, questionType) {
 }
 
 export default function ProtocolBar({ messages, questionType }) {
-  const type = questionType?.toLowerCase() ?? 'conceptual'
-  const phases = PHASES[type] ?? PHASES.conceptual
+  const type    = questionType?.toLowerCase() ?? 'conceptual'
+  const phases  = PHASES[type] ?? PHASES.conceptual
   const current = detectPhase(messages, type)
 
   return (
-    <div className="protocol-bar">
-      {phases.map(phase => (
-        <div
-          key={phase.id}
-          className={[
-            'protocol-step',
-            phase.id === current ? 'active' : '',
-            phase.id < current ? 'done' : '',
-          ].join(' ')}
-        >
-          {phase.label}
-        </div>
-      ))}
+    <div className="proto-bar">
+      {phases.map(phase => {
+        const state = phase.id < current ? 'done'
+                    : phase.id === current ? 'active'
+                    : 'future'
+        // Strip the circled-number prefix (① ② ③ ④ ⑤) — displayed in the circle instead
+        const labelText = phase.label.replace(/^[①②③④⑤]\s*/, '')
+
+        return (
+          <div key={phase.id} className={`proto-step proto-step--${state}`}>
+            <div className="proto-circle" aria-hidden="true">
+              {state === 'done' ? '✓' : phase.id}
+            </div>
+            <span className="proto-label">{labelText}</span>
+          </div>
+        )
+      })}
     </div>
   )
 }
